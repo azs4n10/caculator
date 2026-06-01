@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm --version)",
+      "PowerShell(Get-Command *)",
+      "PowerShell(git clone *)",
+      "PowerShell(Remove-Item *)"
+    ]
+  }
+}
