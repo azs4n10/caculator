@@ -49,7 +49,7 @@ class CalcSkin {
   List<Color> get bgGradient =>
       [background, _mix(background, isDark ? Colors.black : accentColor, isDark ? 0.10 : 0.06)];
 
-  double get _edgeT => isDark ? 0.22 : 0.13;
+  double get _edgeT => isDark ? 0.24 : 0.17;
 
   // Number keys — the calm surface.
   Color get numFill => cardBackground;

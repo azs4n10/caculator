@@ -45,8 +45,6 @@ class _TypewriterKeyState extends State<TypewriterKey> {
         final travel = (c.maxHeight * 0.10).clamp(3.0, 7.0);
         final shape = widget.round ? BoxShape.circle : BoxShape.rectangle;
         final radius = widget.round ? null : BorderRadius.circular(c.maxWidth * 0.30);
-        // Metallic rim ring around the cap (the "typewriter" ring).
-        final ring = Color.lerp(widget.edge, Colors.white, 0.35)!;
 
         return GestureDetector(
           behavior: HitTestBehavior.opaque,
@@ -78,17 +76,25 @@ class _TypewriterKeyState extends State<TypewriterKey> {
                 bottom: _down ? 0 : travel,
                 child: DecoratedBox(
                   decoration: BoxDecoration(
-                    color: widget.color,
+                    // Glossy dome: lighter at the top, fading to the fill — gives
+                    // every key (even white ones) a consistent 3D read.
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [Color.lerp(widget.color, Colors.white, 0.16)!, widget.color],
+                    ),
                     shape: shape,
                     borderRadius: radius,
-                    border: Border.all(color: ring, width: widget.round ? 2.4 : 1.6),
+                    // Rim uses the (darker) edge colour so the cap is always
+                    // outlined, regardless of how light the fill is.
+                    border: Border.all(color: widget.edge, width: widget.round ? 1.6 : 1.3),
                     boxShadow: _down
                         ? []
                         : [
                             BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.10),
-                              offset: const Offset(0, 2),
-                              blurRadius: 4,
+                              color: Colors.black.withValues(alpha: 0.14),
+                              offset: const Offset(0, 2.5),
+                              blurRadius: 5,
                             ),
                           ],
                   ),
