@@ -27,12 +27,26 @@ flutter run -d chrome   # Web で起動
 ```
 
 ## Web で確認・配布（GitHub Pages）
-`.github/workflows/deploy.yml` が `main` への push で自動的に Web ビルドして Pages に公開します。
+公開URL: **https://azs4n10.github.io/caculator/**
 
-1. GitHub にリポジトリを作成（リポジトリ名が URL のパスになります）。
-2. リポジトリ Settings → Pages → **Source: GitHub Actions** に設定。
-3. `deploy.yml` の `--base-href "/kawaii/"` をリポジトリ名に合わせる。
-4. push すると `https://<ユーザー名>.github.io/<リポジトリ名>/` に公開されます。
+GitHub Actions は使いません（このアカウントは Actions が課金ロックのため）。
+代わりに **`gh-pages` ブランチにビルド済みファイルを置くブランチ配信**で公開します
+（flipclock と同じ方式）。更新したいときは:
+
+```bash
+# 1) リポジトリ名に合わせた base-href でビルド
+flutter build web --release --base-href "/caculator/"
+
+# 2) build/web の中身を gh-pages ブランチへ force-push
+cd build/web
+touch .nojekyll
+rm -rf .git && git init -b gh-pages
+git add -A && git commit -m "Deploy web build"
+git push -f https://github.com/azs4n10/caculator.git gh-pages
+```
+
+初回のみ: リポジトリ Settings → Pages → **Source: Deploy from a branch → `gh-pages` / root**。
+数十秒で公開URLが更新されます。
 
 ## アーキテクチャ
 - `lib/engine.dart` … 画面表記 → math_expressions への正規化＋評価（DEG/RAD・暗黙の積・階乗・π/e展開）
