@@ -4,7 +4,19 @@
       "Bash(npm --version)",
       "PowerShell(Get-Command *)",
       "PowerShell(git clone *)",
-      "PowerShell(Remove-Item *)"
+      "PowerShell(Remove-Item *)",
+      "Bash(git ls-remote *)",
+      "Bash(gh --version)",
+      "Bash(gh auth *)",
+      "Bash(gh api *)",
+      "Bash(gh run *)",
+      "Bash(gh workflow *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" https://azs4n10.github.io/caculator/)",
+      "Bash(curl -s https://azs4n10.github.io/caculator/)",
+      "Bash(git rm *)",
+      "Bash(git add *)",
+      "Bash(git commit -q -m ' *)",
+      "Bash(git push *)"
     ]
   }
 }

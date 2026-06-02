@@ -1,5 +1,8 @@
 import 'package:math_expressions/math_expressions.dart';
 
+/// A compiled single-variable function y = f(x).
+typedef RealFn = double Function(double x);
+
 /// Result of a calculation: either a formatted value or an error.
 class CalcResult {
   final bool ok;
@@ -51,6 +54,35 @@ class CalculatorEngine {
       return CalcResult.ok(formatNumber(v), v);
     } catch (_) {
       return const CalcResult.err('しき まちがってるかも 🙀');
+    }
+  }
+
+  /// Compiles an expression containing the variable `x` into a fast, reusable
+  /// function for plotting (parse once, evaluate for many x). Returns null if
+  /// the expression can't be parsed. The returned function yields NaN for x
+  /// values where evaluation fails (e.g. log of a negative) so callers can
+  /// break the curve there.
+  RealFn? compile(String display, {AngleMode angle = AngleMode.rad}) {
+    final src = display.trim();
+    if (src.isEmpty) return null;
+    try {
+      final normalized = _normalize(src, angle);
+      final exp = GrammarParser().parse(normalized);
+      final ctx = ContextModel();
+      final eval = RealEvaluator(ctx);
+      // Probe once so an immediately-invalid expression returns null.
+      ctx.bindVariableName('x', Number(0));
+      eval.evaluate(exp);
+      return (double x) {
+        ctx.bindVariableName('x', Number(x));
+        try {
+          return eval.evaluate(exp).toDouble();
+        } catch (_) {
+          return double.nan;
+        }
+      };
+    } catch (_) {
+      return null;
     }
   }
 

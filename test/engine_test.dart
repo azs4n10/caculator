@@ -37,6 +37,30 @@ void main() {
     test('deg arcsin(1)', () => expect(evalDeg('arcsin(1)'), '90'));
   });
 
+  group('compile f(x)', () {
+    test('sin(x)', () {
+      final f = e.compile('sin(x)')!;
+      expect(f(0), closeTo(0, 1e-9));
+    });
+    test('x^2', () {
+      final f = e.compile('x^2')!;
+      expect(f(3), closeTo(9, 1e-9));
+    });
+    test('implicit 2x', () {
+      final f = e.compile('2x')!;
+      expect(f(5), closeTo(10, 1e-9));
+    });
+    test('deg sin(x)', () {
+      final f = e.compile('sin(x)', angle: AngleMode.deg)!;
+      expect(f(30), closeTo(0.5, 1e-9));
+    });
+    test('invalid returns null', () => expect(e.compile('sin('), isNull));
+    test('non-finite at undefined point', () {
+      final f = e.compile('1/x')!;
+      expect(f(0).isFinite, false);
+    });
+  });
+
   group('errors', () {
     test('malformed', () => expect(e.evaluate('1+').ok, false));
     test('empty', () => expect(e.evaluate('').ok, false));
