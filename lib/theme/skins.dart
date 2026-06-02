@@ -4,6 +4,16 @@ import 'skin.dart';
 // Palette values mirror the flipclock app's skins (5 light + 5 dark).
 
 // ---- Light ----
+// Dusty-pink, monochrome cushion look (modelled on the key3 reference).
+const milkPinkSkin = CalcSkin(
+  id: 'milk_pink', name: 'Milk Pink', isDark: false,
+  background: Color(0xFFE7AEBC), cardBackground: Color(0xFFF6D4DE),
+  digitColor: Color(0xFFC0688A), accentColor: Color(0xFFEFA8C2),
+  buttonColor: Color(0xFFF0A6BE), buttonTextColor: Color(0xFFFFFFFF),
+  primaryTextColor: Color(0xFF8E4F66), subTextColor: Color(0xFFBB8A9C),
+  dividerColor: Color(0xFFDFAEBE),
+);
+
 const yumekawaSkin = CalcSkin(
   id: 'yumekawa', name: 'Yumekawa', isDark: false,
   background: Color(0xFFFCE7F3), cardBackground: Color(0xFFFFFFFF),
@@ -96,14 +106,14 @@ const charcoalRoseSkin = CalcSkin(
 );
 
 const List<CalcSkin> lightSkins = [
-  yumekawaSkin, lavenderSkin, mintPeachSkin, beigeRoseSkin, sugarPinkSkin,
+  milkPinkSkin, yumekawaSkin, lavenderSkin, mintPeachSkin, beigeRoseSkin, sugarPinkSkin,
 ];
 const List<CalcSkin> darkSkins = [
   nightStarSkin, midnightPlumSkin, cocoaNightSkin, galaxySkin, charcoalRoseSkin,
 ];
 const List<CalcSkin> allSkins = [...lightSkins, ...darkSkins];
 
-const CalcSkin defaultSkin = yumekawaSkin;
+const CalcSkin defaultSkin = milkPinkSkin;
 
 CalcSkin skinById(String id) =>
     allSkins.firstWhere((s) => s.id == id, orElse: () => defaultSkin);
