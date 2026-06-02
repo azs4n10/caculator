@@ -132,7 +132,7 @@ class _GraphScreenState extends State<GraphScreen> {
       appBar: AppBar(
         backgroundColor: skin.bgGradient.first,
         foregroundColor: skin.ink,
-        title: Text('Graph 📈', style: Kawaii.ui(18, weight: FontWeight.w800, color: skin.ink)),
+        title: Text('Graph', style: Kawaii.ui(18, weight: FontWeight.w800, color: skin.ink)),
         actions: [
           _angleToggle(skin),
           IconButton(

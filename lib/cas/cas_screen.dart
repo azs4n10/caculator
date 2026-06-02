@@ -154,7 +154,7 @@ class _CasScreenState extends State<CasScreen> {
     final r = _resp;
     if (r == null) {
       return Center(
-        child: Text('Enter an expression and tap a button 🐱', style: Kawaii.ui(14, color: skin.inkSoft)),
+        child: Text('Enter an expression and tap a button', style: Kawaii.ui(14, color: skin.inkSoft)),
       );
     }
     if (!r.ok) {
@@ -162,7 +162,7 @@ class _CasScreenState extends State<CasScreen> {
         child: Padding(
           padding: const EdgeInsets.all(20),
           child: Column(mainAxisSize: MainAxisSize.min, children: [
-            const Text('🙀', style: TextStyle(fontSize: 40)),
+            Icon(Icons.error_outline_rounded, size: 40, color: skin.accent),
             const SizedBox(height: 12),
             Text(r.error ?? 'Error', textAlign: TextAlign.center, style: Kawaii.ui(14, color: skin.ink)),
             const SizedBox(height: 12),

@@ -18,7 +18,12 @@
       "Bash(git commit -q -m ' *)",
       "Bash(git push *)",
       "Bash(rm -rf .shot)",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Bash(FILTER_BRANCH_SQUELCH_WARNING=1 git filter-branch -f --msg-filter 'sed -e \"/^Co-Authored-By:/d\" -e \"/^🤖 Generated/d\" -e \"s/ぷにぷに関数電卓 \\(kawaii scientific calculator\\)/Calculator \\(scientific calculator + graph + CAS\\)/g\" -e \"s/着せ替え:/Themes:/g\" -e \"s/Kawaii Calc/Calculator/g\" -e \"s/kawaii notation/calculator notation/g\"' -- --all)",
+      "Bash(git config *)",
+      "Bash(git reset *)",
+      "Bash(rm -f lib/widgets/cat_mascot.dart)",
+      "Bash(grep -rln \"cat_mascot\\\\|CatMascot\\\\|CatMood\" lib test)"
     ]
   }
 }

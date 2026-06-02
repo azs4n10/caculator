@@ -21,15 +21,15 @@ void main() {
     await tester.pumpAndSettle();
 
     final rad = tester.getRect(find.text('RAD'));
-    final graph = tester.getRect(find.text('📈'));
+    final graph = tester.getRect(find.byIcon(Icons.show_chart_rounded));
     final cas = tester.getRect(find.text('∫'));
-    final hist = tester.getRect(find.text('🕘'));
+    final hist = tester.getRect(find.byIcon(Icons.history_rounded));
     // ignore: avoid_print
     print('RAD=$rad\nGRAPH=$graph\nCAS=$cas\nHIST=$hist');
 
     expect(rad.right, lessThanOrEqualTo(360), reason: 'RAD off-screen: $rad');
-    expect(graph.right, lessThanOrEqualTo(360), reason: '📈 off-screen: $graph');
+    expect(graph.right, lessThanOrEqualTo(360), reason: 'graph off-screen: $graph');
     expect(cas.right, lessThanOrEqualTo(360), reason: '∫ off-screen: $cas');
-    expect(hist.right, lessThanOrEqualTo(360), reason: '🕘 off-screen: $hist');
+    expect(hist.right, lessThanOrEqualTo(360), reason: 'history off-screen: $hist');
   });
 }
