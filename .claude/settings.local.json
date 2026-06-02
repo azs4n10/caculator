@@ -17,7 +17,8 @@
       "Bash(git add *)",
       "Bash(git commit -q -m ' *)",
       "Bash(git push *)",
-      "Bash(rm -rf .shot)"
+      "Bash(rm -rf .shot)",
+      "Bash(git commit *)"
     ]
   }
 }
