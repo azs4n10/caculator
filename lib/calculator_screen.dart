@@ -7,7 +7,6 @@ import 'theme.dart';
 import 'theme/skin.dart';
 import 'theme/skin_picker.dart';
 import 'theme/skin_scope.dart';
-import 'widgets/cat_mascot.dart';
 import 'widgets/typewriter_key.dart';
 
 class HistoryEntry {
@@ -48,7 +47,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   String _expr = '';
   String _result = '';
   String _preview = '';
-  CatMood _mood = CatMood.idle;
   AngleMode _angle = AngleMode.rad;
   bool _justEvaluated = false;
   bool _funcOpen = false;
@@ -94,7 +92,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           _expr = '';
           _result = '';
           _preview = '';
-          _mood = CatMood.idle;
           _justEvaluated = false;
         });
         return;
@@ -155,13 +152,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       if (r.ok) {
         _result = r.text;
         _preview = '';
-        _mood = CatMood.happy;
         _justEvaluated = true;
         _history.insert(0, HistoryEntry(_expr, r.text));
       } else {
         _result = r.text;
         _preview = '';
-        _mood = CatMood.error;
       }
     });
   }
@@ -171,7 +166,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       _expr = h.expr;
       _result = h.result;
       _justEvaluated = true;
-      _mood = CatMood.idle;
       _recompute();
     });
   }
@@ -277,8 +271,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       padding: const EdgeInsets.fromLTRB(14, 8, 10, 0),
       child: Row(
         children: [
-          CatMascot(mood: _mood, size: 40, skin: skin),
-          const SizedBox(width: 8),
           Expanded(
             child: Text('Calculator',
                 maxLines: 1,
@@ -287,13 +279,13 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           ),
           _angleToggle(skin),
           const SizedBox(width: 5),
-          _chip(skin, '🎨', skin.accent, _openSkinPicker),
+          _iconChip(skin, Icons.palette_rounded, skin.accent, _openSkinPicker),
           const SizedBox(width: 5),
-          _chip(skin, '📈', skin.accent, _openGraph),
+          _iconChip(skin, Icons.show_chart_rounded, skin.accent, _openGraph),
           const SizedBox(width: 5),
           _chip(skin, '∫', skin.accent, _openCas),
           const SizedBox(width: 5),
-          _chip(skin, '🕘', skin.inkSoft, _showHistory),
+          _iconChip(skin, Icons.history_rounded, skin.inkSoft, _showHistory),
         ],
       ),
     );
@@ -310,6 +302,21 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           border: Border.all(color: color.withValues(alpha: 0.5)),
         ),
         child: Text(label, style: Kawaii.ui(13, weight: FontWeight.w800, color: color)),
+      ),
+    );
+  }
+
+  Widget _iconChip(CalcSkin skin, IconData icon, Color color, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(7),
+        decoration: BoxDecoration(
+          color: skin.chipBg,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: color.withValues(alpha: 0.5)),
+        ),
+        child: Icon(icon, size: 18, color: color),
       ),
     );
   }
@@ -563,7 +570,7 @@ class _HistorySheet extends StatelessWidget {
             ]),
           ),
           if (history.isEmpty)
-            Expanded(child: Center(child: Text('No calculations yet 🐾', style: Kawaii.ui(15, color: skin.inkSoft))))
+            Expanded(child: Center(child: Text('No calculations yet', style: Kawaii.ui(15, color: skin.inkSoft))))
           else
             Expanded(
               child: ListView.separated(

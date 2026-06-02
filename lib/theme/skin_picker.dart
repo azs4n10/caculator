@@ -25,7 +25,7 @@ class SkinPicker extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.all(14),
               child: Row(children: [
-                const Text('🎨', style: TextStyle(fontSize: 20)),
+                Icon(Icons.palette_rounded, color: current.accentColor, size: 20),
                 const SizedBox(width: 8),
                 Text('Themes', style: Kawaii.ui(18, weight: FontWeight.w800, color: current.ink)),
               ]),
@@ -34,10 +34,10 @@ class SkinPicker extends StatelessWidget {
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(14, 0, 14, 20),
                 children: [
-                  _section(current, '☀️ Light'),
+                  _section(current, 'Light'),
                   _grid(lightSkins),
                   const SizedBox(height: 16),
-                  _section(current, '🌙 Dark'),
+                  _section(current, 'Dark'),
                   _grid(darkSkins),
                 ],
               ),
