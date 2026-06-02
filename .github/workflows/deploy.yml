@@ -26,7 +26,7 @@ jobs:
       - run: flutter test
       # base-href must match the repo name for a project Pages site
       # (https://<user>.github.io/<repo>/). Adjust if you rename the repo.
-      - run: flutter build web --release --base-href "/kawaii/"
+      - run: flutter build web --release --base-href "/caculator/"
       - uses: actions/upload-pages-artifact@v3
         with:
           path: build/web
