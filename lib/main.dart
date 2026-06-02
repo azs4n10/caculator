@@ -9,6 +9,7 @@ import 'theme/skin.dart';
 import 'theme/skins.dart';
 import 'theme/skin_scope.dart';
 import 'theme/texture_scope.dart';
+import 'widgets/keycap_painter.dart';
 
 const _kSkinId = 'skin_id';
 const _kFontId = 'font_id';
@@ -16,6 +17,7 @@ const _kTextureId = 'key_texture';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await loadKeycapShader();
   final prefs = await SharedPreferences.getInstance();
   runApp(KawaiiCalcApp(prefs: prefs));
 }

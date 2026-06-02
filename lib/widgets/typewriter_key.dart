@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../theme.dart';
 import '../theme/key_texture.dart';
+import 'keycap_painter.dart';
 
-/// A soft, cushioned ROUND keycap. It's lit from the top-left (a white
-/// highlight) and shaded to the bottom-right (a soft drop shadow), with a
-/// radial dome gradient, so it reads as a puffy pillow — the key3 feel, kept
-/// circular. [texture] swaps the material: glossy cushion / matte / clear
-/// crystal / jelly. Fills its parent box — wrap in a square (AspectRatio 1).
+/// A round keycap whose surface is rendered by a GLSL material shader
+/// (per-pixel diffuse + specular + rim AO), with a soft cast shadow for depth
+/// and a press animation. Crystal stays real BackdropFilter glass.
+/// Fills its parent box — wrap in a square (AspectRatio 1).
 class TypewriterKey extends StatefulWidget {
   final String label;
   final VoidCallback onTap;
@@ -41,7 +41,6 @@ class _TypewriterKeyState extends State<TypewriterKey> {
     widget.onTap();
   }
 
-  Color _l(double t) => Color.lerp(widget.color, Colors.white, t)!;
   Color _d(double t) => Color.lerp(widget.color, Colors.black, t)!;
 
   static const _mathAxis = {'×', '÷', '−', '-', '+', '='};
@@ -55,41 +54,17 @@ class _TypewriterKeyState extends State<TypewriterKey> {
         final t = widget.texture;
         final shift = h * 0.045;
         final crystal = t == KeyTexture.crystal;
-        const dome = Alignment(-0.35, -0.45); // highlight toward the top-left
 
-        // Soft cushion lighting: white highlight top-left, soft dark shadow
-        // bottom-right.
         final raised = <BoxShadow>[
-          BoxShadow(color: _d(0.20), offset: Offset(w * 0.04, h * 0.06), blurRadius: h * 0.15),
-          BoxShadow(color: Colors.white.withValues(alpha: 0.5), offset: Offset(-w * 0.035, -h * 0.05), blurRadius: h * 0.12),
+          BoxShadow(color: _d(0.22), offset: Offset(w * 0.03, h * 0.055), blurRadius: h * 0.13),
+          BoxShadow(color: Colors.black.withValues(alpha: 0.05), offset: const Offset(0, 2), blurRadius: 5),
         ];
         final pressed = <BoxShadow>[
-          BoxShadow(color: _d(0.13), offset: Offset(w * 0.012, h * 0.018), blurRadius: h * 0.04),
-          BoxShadow(color: Colors.white.withValues(alpha: 0.28), offset: Offset(-w * 0.01, -h * 0.012), blurRadius: h * 0.03),
+          BoxShadow(color: _d(0.14), offset: Offset(0, h * 0.012), blurRadius: h * 0.035),
         ];
         final crystalShadow = <BoxShadow>[
           BoxShadow(color: Colors.black.withValues(alpha: _down ? 0.06 : 0.16), offset: Offset(0, _down ? 1 : 3.5), blurRadius: _down ? 3 : 7),
         ];
-
-        Gradient? capGradient;
-        switch (t) {
-          case KeyTexture.matte:
-            capGradient = RadialGradient(center: dome, radius: 1.0, colors: [_l(0.10), widget.color, _d(0.04)], stops: const [0, 0.6, 1]);
-            break;
-          case KeyTexture.glossy:
-            capGradient = RadialGradient(center: dome, radius: 1.0, colors: [_l(0.34), widget.color, _d(0.07)], stops: const [0, 0.58, 1]);
-            break;
-          case KeyTexture.jelly:
-            capGradient = RadialGradient(center: dome, radius: 1.0, colors: [
-              widget.color.withValues(alpha: 0.6),
-              widget.color.withValues(alpha: 0.78),
-              _d(0.06).withValues(alpha: 0.78),
-            ], stops: const [0, 0.58, 1]);
-            break;
-          case KeyTexture.crystal:
-            capGradient = null;
-            break;
-        }
 
         return GestureDetector(
           behavior: HitTestBehavior.opaque,
@@ -105,13 +80,15 @@ class _TypewriterKeyState extends State<TypewriterKey> {
             margin: EdgeInsets.only(top: _down ? shift : 0),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              gradient: capGradient,
               boxShadow: crystal ? crystalShadow : (_down ? pressed : raised),
             ),
             child: Stack(
               fit: StackFit.expand,
               children: [
-                if (crystal) _crystal(),
+                if (crystal)
+                  _crystal()
+                else
+                  CustomPaint(painter: KeycapPainter(color: widget.color, texture: t, pressed: _down ? 1 : 0)),
                 Center(
                   child: Padding(
                     padding: EdgeInsets.symmetric(horizontal: w * 0.12),
@@ -133,7 +110,6 @@ class _TypewriterKeyState extends State<TypewriterKey> {
   }
 
   Widget _crystal() {
-    // Clear glass — a real BackdropFilter so the background shows through.
     final glass = BackdropFilter(
       filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
       child: DecoratedBox(
