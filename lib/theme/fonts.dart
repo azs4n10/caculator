@@ -6,14 +6,17 @@ class AppFont {
   const AppFont(this.id, this.name, this.family);
 }
 
+// Light, soft typefaces that suit a cute pastel UI (kept to families that
+// include a 700 weight so headings never fall back).
 const List<AppFont> appFonts = [
-  AppFont('rounded', 'Rounded', 'Baloo 2'),
-  AppFont('sans', 'Sans-serif', 'Inter'),
-  AppFont('serif', 'Serif', 'Noto Serif'),
+  AppFont('quicksand', 'Quicksand', 'Quicksand'),
+  AppFont('comfortaa', 'Comfortaa', 'Comfortaa'),
+  AppFont('poppins', 'Poppins', 'Poppins'),
+  AppFont('nunito', 'Nunito', 'Nunito'),
   AppFont('mono', 'Typewriter', 'JetBrains Mono'),
 ];
 
-const AppFont defaultFont = AppFont('rounded', 'Rounded', 'Baloo 2');
+const AppFont defaultFont = AppFont('quicksand', 'Quicksand', 'Quicksand');
 
 AppFont fontById(String id) =>
     appFonts.firstWhere((f) => f.id == id, orElse: () => defaultFont);
