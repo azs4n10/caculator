@@ -280,7 +280,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           CatMascot(mood: _mood, size: 40, skin: skin),
           const SizedBox(width: 8),
           Expanded(
-            child: Text('Kawaii Calc',
+            child: Text('Calculator',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: Kawaii.ui(18, weight: FontWeight.w800, color: skin.ink)),
