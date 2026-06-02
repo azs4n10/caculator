@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../theme.dart';
+import '../widgets/typewriter_key.dart';
 import 'font_scope.dart';
 import 'fonts.dart';
+import 'key_texture.dart';
 import 'skin.dart';
 import 'skins.dart';
 import 'skin_scope.dart';
+import 'texture_scope.dart';
 
 /// Bottom sheet to pick the appearance: font + colour theme (Light / Dark).
 /// Reads the live scopes so selections update immediately.
@@ -43,6 +46,9 @@ class SkinPicker extends StatelessWidget {
                 children: [
                   _label(skin, 'Font'),
                   _fontSelector(skin, fontScope),
+                  const SizedBox(height: 16),
+                  _label(skin, 'Texture'),
+                  _textureSelector(skin, context),
                   const SizedBox(height: 16),
                   _label(skin, 'Light'),
                   _grid(skinScope, lightSkins),
@@ -85,6 +91,50 @@ class SkinPicker extends StatelessWidget {
                 f.name,
                 style: GoogleFonts.getFont(f.family,
                     fontSize: 15, fontWeight: FontWeight.w700, color: skin.primaryTextColor),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _textureSelector(CalcSkin skin, BuildContext context) {
+    final ts = TextureScope.of(context);
+    return Wrap(
+      spacing: 12,
+      runSpacing: 12,
+      children: [
+        for (final opt in keyTextures)
+          GestureDetector(
+            onTap: () => ts.onSelect(opt),
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(10, 8, 10, 6),
+              decoration: BoxDecoration(
+                color: skin.cardBackground,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: opt.id == ts.option.id ? skin.accentColor : skin.dividerColor,
+                  width: opt.id == ts.option.id ? 2.5 : 1,
+                ),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    width: 44,
+                    height: 44,
+                    child: TypewriterKey(
+                      label: '',
+                      color: skin.numFill,
+                      edge: skin.numEdge,
+                      textColor: skin.numText,
+                      texture: opt.texture,
+                      onTap: () => ts.onSelect(opt),
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  Text(opt.name, style: Kawaii.ui(11, weight: FontWeight.w700, color: skin.ink)),
+                ],
               ),
             ),
           ),

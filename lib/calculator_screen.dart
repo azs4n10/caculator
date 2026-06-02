@@ -4,9 +4,11 @@ import 'cas/cas_screen.dart';
 import 'engine.dart';
 import 'graph/graph_screen.dart';
 import 'theme.dart';
+import 'theme/key_texture.dart';
 import 'theme/skin.dart';
 import 'theme/skin_picker.dart';
 import 'theme/skin_scope.dart';
+import 'theme/texture_scope.dart';
 import 'widgets/typewriter_key.dart';
 
 class HistoryEntry {
@@ -51,6 +53,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   bool _justEvaluated = false;
   bool _funcOpen = false;
   bool _second = false;
+  KeyTexture _texture = KeyTexture.glossy;
   final List<HistoryEntry> _history = [];
 
   static const _pad = <_K>[
@@ -173,6 +176,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   @override
   Widget build(BuildContext context) {
     final skin = SkinScope.skinOf(context);
+    _texture = TextureScope.textureOf(context);
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -201,7 +205,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         _display(skin),
         Expanded(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(12, 4, 12, 12),
+            padding: const EdgeInsets.fromLTRB(18, 6, 18, 18),
             child: Column(
               children: [
                 AnimatedSize(
@@ -210,8 +214,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   child: _funcOpen ? _funcTray(skin) : const SizedBox(width: double.infinity),
                 ),
                 _funcToggleBar(skin),
-                const SizedBox(height: 6),
-                Expanded(child: _grid(skin, _pad, 4, gap: 8)),
+                const SizedBox(height: 10),
+                Expanded(child: _grid(skin, _pad, 4, gap: 12)),
               ],
             ),
           ),
@@ -227,14 +231,14 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         _display(skin, compact: true),
         Expanded(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(12, 4, 12, 12),
+            padding: const EdgeInsets.fromLTRB(18, 4, 18, 16),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // Functions always visible on the left (no drawer needed here).
                 Expanded(flex: 5, child: _funcGrid(skin, 5)),
-                const SizedBox(width: 10),
-                Expanded(flex: 4, child: _grid(skin, _pad, 4, gap: 7)),
+                const SizedBox(width: 18),
+                Expanded(flex: 4, child: _grid(skin, _pad, 4, gap: 10)),
               ],
             ),
           ),
@@ -251,11 +255,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       final slice = _funcs.sublist(i, (i + cols).clamp(0, _funcs.length));
       rows.add(Expanded(
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 3.5),
+          padding: const EdgeInsets.symmetric(vertical: 5),
           child: Row(
             children: [
               for (var j = 0; j < slice.length; j++) ...[
-                if (j > 0) const SizedBox(width: 7),
+                if (j > 0) const SizedBox(width: 10),
                 Expanded(child: _funcKey(skin, slice[j])),
               ],
             ],
@@ -407,13 +411,13 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     for (var i = 0; i < _funcs.length; i += cols) {
       final slice = _funcs.sublist(i, (i + cols).clamp(0, _funcs.length));
       rows.add(Padding(
-        padding: const EdgeInsets.symmetric(vertical: 3),
+        padding: const EdgeInsets.symmetric(vertical: 4),
         child: SizedBox(
-          height: 52,
+          height: 54,
           child: Row(
             children: [
               for (var j = 0; j < slice.length; j++) ...[
-                if (j > 0) const SizedBox(width: 6),
+                if (j > 0) const SizedBox(width: 9),
                 Expanded(child: _funcKey(skin, slice[j])),
               ],
             ],
@@ -422,7 +426,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       ));
     }
     return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
+      padding: const EdgeInsets.only(bottom: 8),
       child: Column(mainAxisSize: MainAxisSize.min, children: rows),
     );
   }
@@ -437,6 +441,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             color: _second ? skin.secondFill : skin.funcFill,
             edge: _second ? skin.secondEdge : skin.funcEdge,
             textColor: _second ? skin.secondText : skin.funcText,
+            texture: _texture,
             sizeFactor: 0.40,
             onTap: () => setState(() => _second = !_second),
           ),
@@ -454,6 +459,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           color: skin.funcFill,
           edge: skin.funcEdge,
           textColor: skin.funcText,
+          texture: _texture,
           sizeFactor: 0.40,
           onTap: () => _insert(insert),
         ),
@@ -499,6 +505,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           color: color,
           edge: edge,
           textColor: text,
+          texture: _texture,
           onTap: () => _onKey(k),
         ),
       ),
