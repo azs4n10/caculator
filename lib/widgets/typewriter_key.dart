@@ -85,9 +85,10 @@ class _TypewriterKeyState extends State<TypewriterKey> {
             child: Stack(
               fit: StackFit.expand,
               children: [
-                if (crystal)
-                  _crystal()
-                else
+                if (crystal) ...[
+                  _crystalGlass(),
+                  CustomPaint(painter: KeycapPainter(color: widget.color, texture: t, pressed: _down ? 1 : 0)),
+                ] else
                   CustomPaint(painter: KeycapPainter(color: widget.color, texture: t, pressed: _down ? 1 : 0)),
                 Center(
                   child: Padding(
@@ -109,22 +110,19 @@ class _TypewriterKeyState extends State<TypewriterKey> {
     );
   }
 
-  Widget _crystal() {
-    final glass = BackdropFilter(
-      filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0x6BFFFFFF), Color(0x1FFFFFFF), Color(0x14000000)],
-            stops: [0, 0.55, 1],
+  // Real see-through base: a frosted blur with only a faint tint. The shader
+  // overlay (texture 2) adds the fresnel rim + glint on top.
+  Widget _crystalGlass() {
+    return ClipOval(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.10),
+            shape: BoxShape.circle,
           ),
-          shape: BoxShape.circle,
-          border: Border.all(color: Colors.white.withValues(alpha: 0.5), width: 1.4),
         ),
       ),
     );
-    return ClipOval(child: glass);
   }
 }
