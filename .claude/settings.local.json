@@ -25,7 +25,9 @@
       "Bash(rm -f lib/widgets/cat_mascot.dart)",
       "Bash(grep -rln \"cat_mascot\\\\|CatMascot\\\\|CatMood\" lib test)",
       "Bash(rm -f lib/lab/structured_field.dart)",
-      "Bash(rmdir lib/lab)"
+      "Bash(rmdir lib/lab)",
+      "Bash(cp \"C:/Users/mpmkk/OneDrive/画像/Screenshots/caculater/key3\" \"/c/Users/mpmkk/AppData/Local/Temp/key3.png\")",
+      "Read(//c/Users/mpmkk/AppData/Local/Temp/**)"
     ]
   }
 }
