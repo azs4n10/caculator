@@ -47,6 +47,9 @@ class _TypewriterKeyState extends State<TypewriterKey> {
   Color _l(double t) => Color.lerp(widget.color, Colors.white, t)!;
   Color _d(double t) => Color.lerp(widget.color, Colors.black, t)!;
 
+  static const _mathAxisGlyphs = {'×', '÷', '−', '-', '+', '='};
+  double _legendDy(double size) => _mathAxisGlyphs.contains(widget.label) ? size * 0.09 : 0;
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
@@ -131,10 +134,15 @@ class _TypewriterKeyState extends State<TypewriterKey> {
                     Center(
                       child: Padding(
                         padding: EdgeInsets.symmetric(horizontal: c.maxWidth * 0.12),
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: Text(widget.label,
-                              style: Kawaii.key(c.maxHeight * widget.sizeFactor).copyWith(color: widget.textColor)),
+                        // Math-axis symbols (× ÷ − + =) sit high in the line box;
+                        // nudge them down so they look optically centred.
+                        child: Transform.translate(
+                          offset: Offset(0, _legendDy(c.maxHeight * widget.sizeFactor)),
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(widget.label,
+                                style: Kawaii.key(c.maxHeight * widget.sizeFactor).copyWith(color: widget.textColor)),
+                          ),
                         ),
                       ),
                     ),
@@ -166,13 +174,21 @@ class _TypewriterKeyState extends State<TypewriterKey> {
   }
 
   Widget _crystal(double bw) {
+    // Domed glass: a bright sheen near the top fading to a faintly darker rim
+    // gives 3D curvature, while the low alphas + BackdropFilter keep it truly
+    // see-through.
     final glass = BackdropFilter(
       filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.12),
+          gradient: const RadialGradient(
+            center: Alignment(-0.1, -0.45),
+            radius: 0.95,
+            colors: [Color(0x6BFFFFFF), Color(0x1FFFFFFF), Color(0x14000000)],
+            stops: [0, 0.6, 1],
+          ),
           shape: BoxShape.circle,
-          border: Border.all(color: Colors.white.withValues(alpha: 0.45), width: bw),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.5), width: bw),
         ),
       ),
     );
@@ -182,7 +198,7 @@ class _TypewriterKeyState extends State<TypewriterKey> {
         DecoratedBox(
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            boxShadow: _down ? [] : [BoxShadow(color: Colors.black.withValues(alpha: 0.12), offset: const Offset(0, 3), blurRadius: 7)],
+            boxShadow: _down ? [] : [BoxShadow(color: Colors.black.withValues(alpha: 0.16), offset: const Offset(0, 3.5), blurRadius: 6)],
           ),
         ),
         ClipOval(child: glass),
