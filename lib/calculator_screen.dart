@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'cas/cas_screen.dart';
 import 'engine.dart';
+import 'graph/graph_screen.dart';
 import 'theme.dart';
 import 'theme/skin.dart';
 import 'theme/skin_picker.dart';
@@ -231,6 +232,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           const SizedBox(width: 5),
           _chip(skin, '🎨', skin.accent, _openSkinPicker),
           const SizedBox(width: 5),
+          _chip(skin, '📈', skin.accent, _openGraph),
+          const SizedBox(width: 5),
           _chip(skin, '∫', skin.accent, _openCas),
           const SizedBox(width: 5),
           _chip(skin, '履歴', skin.inkSoft, _showHistory),
@@ -429,6 +432,12 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   void _openCas() {
     Navigator.of(context).push(MaterialPageRoute(
       builder: (_) => CasScreen(initialExpr: _expr),
+    ));
+  }
+
+  void _openGraph() {
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (_) => GraphScreen(initialExpr: _expr),
     ));
   }
 
