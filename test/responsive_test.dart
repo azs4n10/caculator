@@ -37,7 +37,7 @@ void main() {
       expect(find.text('='), findsOneWidget);
 
       // Open the function drawer.
-      await tester.tap(find.text('ƒ(x) かんすう'));
+      await tester.tap(find.text('ƒ(x) functions'));
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull, reason: '$name — drawer open');
       expect(find.text('sin'), findsOneWidget);

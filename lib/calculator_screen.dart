@@ -223,10 +223,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           CatMascot(mood: _mood, size: 40, skin: skin),
           const SizedBox(width: 8),
           Expanded(
-            child: Text('ぷにぷに関数電卓',
+            child: Text('Kawaii Calc',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: Kawaii.ui(17, weight: FontWeight.w800, color: skin.ink)),
+                style: Kawaii.ui(18, weight: FontWeight.w800, color: skin.ink)),
           ),
           _angleToggle(skin),
           const SizedBox(width: 5),
@@ -236,7 +236,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           const SizedBox(width: 5),
           _chip(skin, '∫', skin.accent, _openCas),
           const SizedBox(width: 5),
-          _chip(skin, '履歴', skin.inkSoft, _showHistory),
+          _chip(skin, '🕘', skin.inkSoft, _showHistory),
         ],
       ),
     );
@@ -329,7 +329,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             Icon(_funcOpen ? Icons.keyboard_arrow_down_rounded : Icons.keyboard_arrow_up_rounded,
                 color: skin.ink),
             const SizedBox(width: 4),
-            Text(_funcOpen ? 'かんすうを とじる' : 'ƒ(x) かんすう',
+            Text(_funcOpen ? 'Hide functions' : 'ƒ(x) functions',
                 style: Kawaii.ui(14, weight: FontWeight.w800, color: skin.ink)),
           ],
         ),
@@ -343,14 +343,17 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     for (var i = 0; i < _funcs.length; i += cols) {
       final slice = _funcs.sublist(i, (i + cols).clamp(0, _funcs.length));
       rows.add(Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
-        child: Row(
-          children: [
-            for (var j = 0; j < slice.length; j++) ...[
-              if (j > 0) const SizedBox(width: 6),
-              Expanded(child: _funcKey(skin, slice[j])),
+        padding: const EdgeInsets.symmetric(vertical: 3),
+        child: SizedBox(
+          height: 52,
+          child: Row(
+            children: [
+              for (var j = 0; j < slice.length; j++) ...[
+                if (j > 0) const SizedBox(width: 6),
+                Expanded(child: _funcKey(skin, slice[j])),
+              ],
             ],
-          ],
+          ),
         ),
       ));
     }
@@ -362,27 +365,35 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
   Widget _funcKey(CalcSkin skin, _FK f) {
     if (f.isSecond) {
-      return TypewriterKey(
-        label: '2nd',
-        color: _second ? skin.secondFill : skin.funcFill,
-        edge: _second ? skin.secondEdge : skin.funcEdge,
-        textColor: _second ? skin.secondText : skin.funcText,
-        fontSize: 15,
-        height: 46,
-        onTap: () => setState(() => _second = !_second),
+      return Center(
+        child: AspectRatio(
+          aspectRatio: 1,
+          child: TypewriterKey(
+            label: '2nd',
+            color: _second ? skin.secondFill : skin.funcFill,
+            edge: _second ? skin.secondEdge : skin.funcEdge,
+            textColor: _second ? skin.secondText : skin.funcText,
+            fontSize: 14,
+            onTap: () => setState(() => _second = !_second),
+          ),
+        ),
       );
     }
     final showAlt = _second && f.label2 != null;
     final label = showAlt ? f.label2! : f.label;
     final insert = showAlt ? f.insert2! : f.insert;
-    return TypewriterKey(
-      label: label,
-      color: skin.funcFill,
-      edge: skin.funcEdge,
-      textColor: skin.funcText,
-      fontSize: 15,
-      height: 46,
-      onTap: () => _insert(insert),
+    return Center(
+      child: AspectRatio(
+        aspectRatio: 1,
+        child: TypewriterKey(
+          label: label,
+          color: skin.funcFill,
+          edge: skin.funcEdge,
+          textColor: skin.funcText,
+          fontSize: 14,
+          onTap: () => _insert(insert),
+        ),
+      ),
     );
   }
 
@@ -416,15 +427,17 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       _Cat.mint => (skin.eqFill, skin.eqEdge, skin.eqText),
       _Cat.second => (skin.secondFill, skin.secondEdge, skin.secondText),
     };
-    return LayoutBuilder(
-      builder: (_, c) => TypewriterKey(
-        label: k.label,
-        color: color,
-        edge: edge,
-        textColor: text,
-        fontSize: fontSize,
-        height: (c.maxHeight - 5).clamp(34, 70).toDouble(),
-        onTap: () => _onKey(k),
+    return Center(
+      child: AspectRatio(
+        aspectRatio: 1,
+        child: TypewriterKey(
+          label: k.label,
+          color: color,
+          edge: edge,
+          textColor: text,
+          fontSize: fontSize,
+          onTap: () => _onKey(k),
+        ),
       ),
     );
   }
@@ -489,11 +502,11 @@ class _HistorySheet extends StatelessWidget {
             child: Row(children: [
               Icon(Icons.history_rounded, color: skin.accent),
               const SizedBox(width: 8),
-              Text('けいさん履歴', style: Kawaii.ui(17, weight: FontWeight.w800, color: skin.ink)),
+              Text('History', style: Kawaii.ui(17, weight: FontWeight.w800, color: skin.ink)),
             ]),
           ),
           if (history.isEmpty)
-            Expanded(child: Center(child: Text('まだ計算してないよ 🐾', style: Kawaii.ui(15, color: skin.inkSoft))))
+            Expanded(child: Center(child: Text('No calculations yet 🐾', style: Kawaii.ui(15, color: skin.inkSoft))))
           else
             Expanded(
               child: ListView.separated(

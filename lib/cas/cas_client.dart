@@ -57,7 +57,7 @@ class CasClient {
           .timeout(const Duration(seconds: 12));
       final j = jsonDecode(utf8.decode(r.bodyBytes)) as Map<String, dynamic>;
       if (j['ok'] != true) {
-        return CasResponse(ok: false, error: j['error'] as String? ?? 'CAS エラー');
+        return CasResponse(ok: false, error: j['error'] as String? ?? 'CAS error');
       }
       // /api/cas returns a single result; /api/analyze returns a list.
       final List<CasCard> cards;
@@ -71,17 +71,17 @@ class CasClient {
       }
       return CasResponse(ok: true, inputLatex: j['input_latex'] as String?, results: cards);
     } catch (e) {
-      return CasResponse(ok: false, error: 'サーバにつながらないみたい 🙀\n($e)');
+      return CasResponse(ok: false, error: "Couldn't reach the server 🙀\n($e)");
     }
   }
 
   static String _actionLabel(String? a) => switch (a) {
-        'simplify' => 'かんたんに',
-        'expand' => '展開',
-        'factor' => '因数分解',
-        'derivative' => '微分',
-        'integral' => '積分',
-        'solve' => '解',
-        _ => 'けっか',
+        'simplify' => 'Simplify',
+        'expand' => 'Expand',
+        'factor' => 'Factor',
+        'derivative' => 'Derivative',
+        'integral' => 'Integral',
+        'solve' => 'Solution',
+        _ => 'Result',
       };
 }

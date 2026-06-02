@@ -3,7 +3,7 @@ import '../theme.dart';
 import 'skin.dart';
 import 'skins.dart';
 
-/// Bottom sheet to pick a skin (着せ替え), grouped into Light and Dark.
+/// Bottom sheet to pick a skin, grouped into Light and Dark.
 class SkinPicker extends StatelessWidget {
   final CalcSkin current;
   final ValueChanged<CalcSkin> onSelect;
@@ -27,17 +27,17 @@ class SkinPicker extends StatelessWidget {
               child: Row(children: [
                 const Text('🎨', style: TextStyle(fontSize: 20)),
                 const SizedBox(width: 8),
-                Text('きせかえ', style: Kawaii.ui(18, weight: FontWeight.w800, color: current.ink)),
+                Text('Themes', style: Kawaii.ui(18, weight: FontWeight.w800, color: current.ink)),
               ]),
             ),
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(14, 0, 14, 20),
                 children: [
-                  _section(current, '☀️ ライト'),
+                  _section(current, '☀️ Light'),
                   _grid(lightSkins),
                   const SizedBox(height: 16),
-                  _section(current, '🌙 ダーク'),
+                  _section(current, '🌙 Dark'),
                   _grid(darkSkins),
                 ],
               ),

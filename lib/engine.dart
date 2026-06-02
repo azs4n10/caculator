@@ -49,11 +49,11 @@ class CalculatorEngine {
       final evaluator = RealEvaluator(ContextModel());
       final num raw = evaluator.evaluate(exp);
       final v = raw.toDouble();
-      if (v.isNaN) return const CalcResult.err('なんでやねん 🙀');
-      if (v.isInfinite) return const CalcResult.err('∞ おおきすぎ 🙀');
+      if (v.isNaN) return const CalcResult.err('undefined 🙀');
+      if (v.isInfinite) return const CalcResult.err('∞ too big 🙀');
       return CalcResult.ok(formatNumber(v), v);
     } catch (_) {
-      return const CalcResult.err('しき まちがってるかも 🙀');
+      return const CalcResult.err('check expression 🙀');
     }
   }
 
