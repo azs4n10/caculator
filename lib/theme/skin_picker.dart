@@ -1,16 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../theme.dart';
+import 'font_scope.dart';
+import 'fonts.dart';
 import 'skin.dart';
 import 'skins.dart';
+import 'skin_scope.dart';
 
-/// Bottom sheet to pick a skin, grouped into Light and Dark.
+/// Bottom sheet to pick the appearance: font + colour theme (Light / Dark).
+/// Reads the live scopes so selections update immediately.
 class SkinPicker extends StatelessWidget {
-  final CalcSkin current;
-  final ValueChanged<CalcSkin> onSelect;
-  const SkinPicker({super.key, required this.current, required this.onSelect});
+  const SkinPicker({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final skinScope = SkinScope.of(context);
+    final fontScope = FontScope.of(context);
+    final skin = skinScope.skin;
+
     return SafeArea(
       child: SizedBox(
         height: MediaQuery.of(context).size.height * 0.66,
@@ -20,25 +27,28 @@ class SkinPicker extends StatelessWidget {
             Container(
               width: 44,
               height: 5,
-              decoration: BoxDecoration(color: current.divider, borderRadius: BorderRadius.circular(3)),
+              decoration: BoxDecoration(color: skin.divider, borderRadius: BorderRadius.circular(3)),
             ),
             Padding(
               padding: const EdgeInsets.all(14),
               child: Row(children: [
-                Icon(Icons.palette_rounded, color: current.accentColor, size: 20),
+                Icon(Icons.palette_rounded, color: skin.accentColor, size: 20),
                 const SizedBox(width: 8),
-                Text('Themes', style: Kawaii.ui(18, weight: FontWeight.w800, color: current.ink)),
+                Text('Appearance', style: Kawaii.ui(18, weight: FontWeight.w800, color: skin.ink)),
               ]),
             ),
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(14, 0, 14, 20),
                 children: [
-                  _section(current, 'Light'),
-                  _grid(lightSkins),
+                  _label(skin, 'Font'),
+                  _fontSelector(skin, fontScope),
                   const SizedBox(height: 16),
-                  _section(current, 'Dark'),
-                  _grid(darkSkins),
+                  _label(skin, 'Light'),
+                  _grid(skinScope, lightSkins),
+                  const SizedBox(height: 16),
+                  _label(skin, 'Dark'),
+                  _grid(skinScope, darkSkins),
                 ],
               ),
             ),
@@ -48,12 +58,41 @@ class SkinPicker extends StatelessWidget {
     );
   }
 
-  Widget _section(CalcSkin skin, String title) => Padding(
+  Widget _label(CalcSkin skin, String title) => Padding(
         padding: const EdgeInsets.only(bottom: 10),
         child: Text(title, style: Kawaii.ui(14, weight: FontWeight.w800, color: skin.inkSoft)),
       );
 
-  Widget _grid(List<CalcSkin> skins) {
+  Widget _fontSelector(CalcSkin skin, FontScope fontScope) {
+    return Wrap(
+      spacing: 10,
+      runSpacing: 10,
+      children: [
+        for (final f in appFonts)
+          GestureDetector(
+            onTap: () => fontScope.onSelect(f),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              decoration: BoxDecoration(
+                color: skin.cardBackground,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: f.id == fontScope.font.id ? skin.accentColor : skin.dividerColor,
+                  width: f.id == fontScope.font.id ? 2.5 : 1,
+                ),
+              ),
+              child: Text(
+                f.name,
+                style: GoogleFonts.getFont(f.family,
+                    fontSize: 15, fontWeight: FontWeight.w700, color: skin.primaryTextColor),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _grid(SkinScope skinScope, List<CalcSkin> skins) {
     return GridView.count(
       crossAxisCount: 2,
       shrinkWrap: true,
@@ -61,14 +100,14 @@ class SkinPicker extends StatelessWidget {
       mainAxisSpacing: 12,
       crossAxisSpacing: 12,
       childAspectRatio: 1.55,
-      children: [for (final s in skins) _card(s)],
+      children: [for (final s in skins) _card(skinScope, s)],
     );
   }
 
-  Widget _card(CalcSkin s) {
-    final selected = s.id == current.id;
+  Widget _card(SkinScope skinScope, CalcSkin s) {
+    final selected = s.id == skinScope.skin.id;
     return GestureDetector(
-      onTap: () => onSelect(s),
+      onTap: () => skinScope.onSelect(s),
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
@@ -97,7 +136,9 @@ class SkinPicker extends StatelessWidget {
                 if (selected) Icon(Icons.check_circle_rounded, color: s.accentColor, size: 20),
               ],
             ),
-            Text(s.name, maxLines: 1, overflow: TextOverflow.ellipsis,
+            Text(s.name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: Kawaii.ui(14, weight: FontWeight.w800, color: s.primaryTextColor)),
           ],
         ),

@@ -211,7 +211,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 ),
                 _funcToggleBar(skin),
                 const SizedBox(height: 6),
-                Expanded(child: _grid(skin, _pad, 4, fontSize: 24, gap: 8)),
+                Expanded(child: _grid(skin, _pad, 4, gap: 8)),
               ],
             ),
           ),
@@ -234,7 +234,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 // Functions always visible on the left (no drawer needed here).
                 Expanded(flex: 5, child: _funcGrid(skin, 5)),
                 const SizedBox(width: 10),
-                Expanded(flex: 4, child: _grid(skin, _pad, 4, fontSize: 22, gap: 7)),
+                Expanded(flex: 4, child: _grid(skin, _pad, 4, gap: 7)),
               ],
             ),
           ),
@@ -437,7 +437,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             color: _second ? skin.secondFill : skin.funcFill,
             edge: _second ? skin.secondEdge : skin.funcEdge,
             textColor: _second ? skin.secondText : skin.funcText,
-            fontSize: 14,
+            sizeFactor: 0.40,
             onTap: () => setState(() => _second = !_second),
           ),
         ),
@@ -454,14 +454,14 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           color: skin.funcFill,
           edge: skin.funcEdge,
           textColor: skin.funcText,
-          fontSize: 14,
+          sizeFactor: 0.40,
           onTap: () => _insert(insert),
         ),
       ),
     );
   }
 
-  Widget _grid(CalcSkin skin, List<_K> keys, int cols, {required double fontSize, required double gap}) {
+  Widget _grid(CalcSkin skin, List<_K> keys, int cols, {required double gap}) {
     final rows = <Widget>[];
     for (var i = 0; i < keys.length; i += cols) {
       final slice = keys.sublist(i, (i + cols).clamp(0, keys.length));
@@ -472,7 +472,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             children: [
               for (var j = 0; j < slice.length; j++) ...[
                 if (j > 0) SizedBox(width: gap),
-                Expanded(child: _keyWidget(skin, slice[j], fontSize)),
+                Expanded(child: _keyWidget(skin, slice[j])),
               ],
             ],
           ),
@@ -482,7 +482,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     return Column(children: rows);
   }
 
-  Widget _keyWidget(CalcSkin skin, _K k, double fontSize) {
+  Widget _keyWidget(CalcSkin skin, _K k) {
     final (color, edge, text) = switch (k.cat) {
       _Cat.number => (skin.numFill, skin.numEdge, skin.numText),
       _Cat.op => (skin.opFill, skin.opEdge, skin.opText),
@@ -499,7 +499,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           color: color,
           edge: edge,
           textColor: text,
-          fontSize: fontSize,
           onTap: () => _onKey(k),
         ),
       ),
@@ -519,15 +518,14 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   void _openSkinPicker() {
-    final scope = SkinScope.of(context);
     showModalBottomSheet(
       context: context,
-      backgroundColor: scope.skin.paper,
+      backgroundColor: SkinScope.skinOf(context).paper,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
-      builder: (_) => SkinPicker(current: scope.skin, onSelect: scope.onSelect),
+      builder: (_) => const SkinPicker(),
     );
   }
 

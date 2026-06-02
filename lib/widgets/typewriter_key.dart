@@ -12,7 +12,9 @@ class TypewriterKey extends StatefulWidget {
   final Color color;
   final Color edge;
   final Color textColor;
-  final double fontSize;
+
+  /// Legend size as a fraction of the cap height (so text scales with the key).
+  final double sizeFactor;
   final bool round;
 
   const TypewriterKey({
@@ -22,7 +24,7 @@ class TypewriterKey extends StatefulWidget {
     required this.color,
     required this.edge,
     required this.textColor,
-    this.fontSize = 24,
+    this.sizeFactor = 0.46,
     this.round = true,
   });
 
@@ -100,12 +102,12 @@ class _TypewriterKeyState extends State<TypewriterKey> {
                   ),
                   child: Center(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      padding: EdgeInsets.symmetric(horizontal: c.maxWidth * 0.12),
                       child: FittedBox(
                         fit: BoxFit.scaleDown,
                         child: Text(
                           widget.label,
-                          style: Kawaii.key(widget.fontSize).copyWith(color: widget.textColor),
+                          style: Kawaii.key(c.maxHeight * widget.sizeFactor).copyWith(color: widget.textColor),
                         ),
                       ),
                     ),
