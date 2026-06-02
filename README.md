@@ -37,8 +37,10 @@ uvicorn main:app --reload --port 8000
 ## Deploy (GitHub Pages)
 Published from the `gh-pages` branch (GitHub Actions is not used on this account):
 ```bash
-flutter build web --release --base-href "/caculator/"
+# --pwa-strategy=none disables the service worker so updates aren't cached stale
+flutter build web --release --pwa-strategy=none --base-href "/caculator/"
 cd build/web
+rm -f flutter_service_worker.js
 touch .nojekyll
 rm -rf .git && git init -b gh-pages
 git add -A && git commit -m "Deploy web build"
