@@ -36,16 +36,22 @@ uvicorn main:app --reload --port 8000
 
 ## Deploy (GitHub Pages)
 Published from the `gh-pages` branch (GitHub Actions is not used on this account):
+GitHub Pages caches assets for 10 min, so two things keep updates from sticking
+stale: `--pwa-strategy=none` (no service worker) + appending a `?v=<hash>` query
+to the entry scripts (cache-busting).
 ```bash
-# --pwa-strategy=none disables the service worker so updates aren't cached stale
 flutter build web --release --pwa-strategy=none --base-href "/caculator/"
 cd build/web
-rm -f flutter_service_worker.js
+V=$(git -C ../.. rev-parse --short HEAD)
+sed -i "s#flutter_bootstrap.js#flutter_bootstrap.js?v=$V#g" index.html
+sed -i "s#main.dart.js#main.dart.js?v=$V#g" flutter_bootstrap.js
 touch .nojekyll
 rm -rf .git && git init -b gh-pages
 git add -A && git commit -m "Deploy web build"
 git push -f https://github.com/azs4n10/caculator.git gh-pages
 ```
+(A kill-switch `flutter_service_worker.js` is also deployed so any old service
+worker on a visitor's browser self-unregisters.)
 First time only: repository Settings → Pages → **Source: Deploy from a branch → `gh-pages` / root**.
 
 ## Architecture
