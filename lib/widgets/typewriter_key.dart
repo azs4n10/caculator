@@ -45,39 +45,55 @@ class _TypewriterKeyState extends State<TypewriterKey> {
   }
 
   Color _l(double t) => Color.lerp(widget.color, Colors.white, t)!;
+  Color _d(double t) => Color.lerp(widget.color, Colors.black, t)!;
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (_, c) {
         final t = widget.texture;
-        final travel = (c.maxHeight * (t == KeyTexture.jelly ? 0.13 : 0.10))
-            .clamp(3.0, t == KeyTexture.jelly ? 9.0 : 7.0);
+        final travel = (c.maxHeight * (t == KeyTexture.jelly ? 0.15 : 0.13))
+            .clamp(4.0, t == KeyTexture.jelly ? 11.0 : 9.0);
         const bw = 1.5;
+        // Convex dome: bright near the top, shaded at the rim — reads 3D without
+        // a discrete highlight blob.
+        const domeCenter = Alignment(-0.1, -0.45);
 
         Color stem = widget.edge;
         Widget capBg;
 
         switch (t) {
           case KeyTexture.matte:
-            capBg = _circle(color: widget.color, border: widget.edge, shadow: [
-              BoxShadow(color: Colors.black.withValues(alpha: 0.09), offset: const Offset(0, 1.5), blurRadius: 3),
-            ]);
+            capBg = _circle(
+              gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [_l(0.05), widget.color, _d(0.05)], stops: const [0, 0.5, 1]),
+              border: widget.edge,
+              shadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.10), offset: const Offset(0, 2), blurRadius: 4)],
+            );
             break;
           case KeyTexture.glossy:
-            capBg = _circle(gradient: [_l(0.16), widget.color], border: widget.edge, shadow: [
-              BoxShadow(color: Colors.black.withValues(alpha: 0.13), offset: const Offset(0, 2.5), blurRadius: 5),
-            ]);
+            capBg = _circle(
+              gradient: RadialGradient(center: domeCenter, radius: 0.95, colors: [_l(0.24), widget.color, _d(0.08)], stops: const [0, 0.55, 1]),
+              border: widget.edge,
+              shadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.16), offset: const Offset(0, 3.5), blurRadius: 6)],
+            );
             break;
           case KeyTexture.jelly:
-            stem = widget.edge.withValues(alpha: 0.5);
-            capBg = _circle(color: widget.color.withValues(alpha: 0.72), border: widget.edge.withValues(alpha: 0.5), shadow: [
-              BoxShadow(color: widget.color.withValues(alpha: 0.4), offset: const Offset(0, 4), blurRadius: 9),
-              BoxShadow(color: Colors.black.withValues(alpha: 0.10), offset: const Offset(0, 2), blurRadius: 5),
-            ]);
+            stem = widget.edge.withValues(alpha: 0.55);
+            capBg = _circle(
+              gradient: RadialGradient(center: domeCenter, radius: 0.95, colors: [
+                widget.color.withValues(alpha: 0.55),
+                widget.color.withValues(alpha: 0.76),
+                _d(0.06).withValues(alpha: 0.76),
+              ], stops: const [0, 0.55, 1]),
+              border: widget.edge.withValues(alpha: 0.5),
+              shadow: [
+                BoxShadow(color: widget.color.withValues(alpha: 0.45), offset: const Offset(0, 5), blurRadius: 10),
+                BoxShadow(color: Colors.black.withValues(alpha: 0.10), offset: const Offset(0, 2), blurRadius: 5),
+              ],
+            );
             break;
           case KeyTexture.crystal:
-            stem = widget.edge.withValues(alpha: 0.3);
+            stem = widget.edge.withValues(alpha: 0.35);
             capBg = _crystal(bw);
             break;
         }
@@ -133,15 +149,15 @@ class _TypewriterKeyState extends State<TypewriterKey> {
   }
 
   Widget _circle({
+    Gradient? gradient,
     Color? color,
-    List<Color>? gradient,
     required Color border,
     required List<BoxShadow> shadow,
   }) {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: gradient == null ? color : null,
-        gradient: gradient == null ? null : LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: gradient),
+        gradient: gradient,
         shape: BoxShape.circle,
         border: Border.all(color: border, width: 1.5),
         boxShadow: _down ? [] : shadow,
