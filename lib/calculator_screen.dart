@@ -188,31 +188,88 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         ),
       ),
       child: SafeArea(
-        child: Column(
-          children: [
-            _header(skin),
-            _display(skin),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(12, 4, 12, 12),
-                child: Column(
-                  children: [
-                    AnimatedSize(
-                      duration: const Duration(milliseconds: 220),
-                      curve: Curves.easeOutCubic,
-                      child: _funcOpen ? _funcTray(skin) : const SizedBox(width: double.infinity),
-                    ),
-                    _funcToggleBar(skin),
-                    const SizedBox(height: 6),
-                    Expanded(child: _grid(skin, _pad, 4, fontSize: 24, gap: 8)),
-                  ],
-                ),
-              ),
-            ),
-          ],
+        child: LayoutBuilder(
+          builder: (_, c) {
+            // Wide / landscape: put functions beside the number pad so keys stay
+            // big instead of shrinking to the (short) height.
+            final wide = c.maxWidth > c.maxHeight * 1.25;
+            return wide ? _landscapeBody(skin) : _portraitBody(skin);
+          },
         ),
       ),
     );
+  }
+
+  Widget _portraitBody(CalcSkin skin) {
+    return Column(
+      children: [
+        _header(skin),
+        _display(skin),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(12, 4, 12, 12),
+            child: Column(
+              children: [
+                AnimatedSize(
+                  duration: const Duration(milliseconds: 220),
+                  curve: Curves.easeOutCubic,
+                  child: _funcOpen ? _funcTray(skin) : const SizedBox(width: double.infinity),
+                ),
+                _funcToggleBar(skin),
+                const SizedBox(height: 6),
+                Expanded(child: _grid(skin, _pad, 4, fontSize: 24, gap: 8)),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _landscapeBody(CalcSkin skin) {
+    return Column(
+      children: [
+        _header(skin),
+        _display(skin, compact: true),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(12, 4, 12, 12),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Functions always visible on the left (no drawer needed here).
+                Expanded(flex: 5, child: _funcGrid(skin, 5)),
+                const SizedBox(width: 10),
+                Expanded(flex: 4, child: _grid(skin, _pad, 4, fontSize: 22, gap: 7)),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Lays the function keys into a grid that fills its height (used in
+  /// landscape, where the ƒ(x) drawer isn't needed).
+  Widget _funcGrid(CalcSkin skin, int cols) {
+    final rows = <Widget>[];
+    for (var i = 0; i < _funcs.length; i += cols) {
+      final slice = _funcs.sublist(i, (i + cols).clamp(0, _funcs.length));
+      rows.add(Expanded(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 3.5),
+          child: Row(
+            children: [
+              for (var j = 0; j < slice.length; j++) ...[
+                if (j > 0) const SizedBox(width: 7),
+                Expanded(child: _funcKey(skin, slice[j])),
+              ],
+            ],
+          ),
+        ),
+      ));
+    }
+    return Column(children: rows);
   }
 
   Widget _header(CalcSkin skin) {
@@ -277,12 +334,12 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     );
   }
 
-  Widget _display(CalcSkin skin) {
+  Widget _display(CalcSkin skin, {bool compact = false}) {
     return Container(
-      margin: const EdgeInsets.fromLTRB(12, 8, 12, 4),
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+      margin: EdgeInsets.fromLTRB(12, compact ? 6 : 8, 12, 4),
+      padding: EdgeInsets.symmetric(horizontal: 18, vertical: compact ? 10 : 16),
       width: double.infinity,
-      constraints: const BoxConstraints(minHeight: 110),
+      constraints: BoxConstraints(minHeight: compact ? 60 : 110),
       decoration: BoxDecoration(
         color: skin.paper,
         borderRadius: BorderRadius.circular(24),
@@ -298,13 +355,13 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             reverse: true,
-            child: Text(_expr.isEmpty ? '　' : _expr, style: Kawaii.display(26).copyWith(color: skin.ink)),
+            child: Text(_expr.isEmpty ? '　' : _expr, style: Kawaii.display(compact ? 20 : 26).copyWith(color: skin.ink)),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: compact ? 4 : 8),
           if (_justEvaluated || _result.isNotEmpty)
-            Text(_result, style: Kawaii.display(40).copyWith(color: skin.result))
+            Text(_result, style: Kawaii.display(compact ? 28 : 40).copyWith(color: skin.result))
           else if (_preview.isNotEmpty)
-            Text('= $_preview', style: Kawaii.display(22).copyWith(color: skin.inkSoft)),
+            Text('= $_preview', style: Kawaii.display(compact ? 18 : 22).copyWith(color: skin.inkSoft)),
         ],
       ),
     );
