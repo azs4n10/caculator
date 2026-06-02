@@ -5,7 +5,7 @@ import '../theme/skin.dart';
 import '../theme/skin_scope.dart';
 import 'cas_client.dart';
 
-/// The "おりこう計算" (CAS) panel: send an expression to the SymPy backend and
+/// The Solver (CAS) panel: send an expression to the SymPy backend and
 /// show symbolic results — simplify / expand / factor / differentiate /
 /// integrate / solve. This is the WolframAlpha-class layer.
 class CasScreen extends StatefulWidget {
@@ -24,13 +24,13 @@ class _CasScreenState extends State<CasScreen> {
   CasResponse? _resp;
 
   static const _actions = [
-    ('ぜんぶ', 'analyze'),
-    ('かんたんに', 'simplify'),
-    ('展開', 'expand'),
-    ('因数分解', 'factor'),
-    ('微分', 'derivative'),
-    ('積分', 'integral'),
-    ('= 0 を解く', 'solve'),
+    ('All', 'analyze'),
+    ('Simplify', 'simplify'),
+    ('Expand', 'expand'),
+    ('Factor', 'factor'),
+    ('Derivative', 'derivative'),
+    ('Integral', 'integral'),
+    ('Solve = 0', 'solve'),
   ];
 
   @override
@@ -69,7 +69,7 @@ class _CasScreenState extends State<CasScreen> {
       appBar: AppBar(
         backgroundColor: skin.bgGradient.first,
         foregroundColor: skin.ink,
-        title: Text('おりこう計算 ∫', style: Kawaii.ui(18, weight: FontWeight.w800, color: skin.ink)),
+        title: Text('Solver ∫', style: Kawaii.ui(18, weight: FontWeight.w800, color: skin.ink)),
         actions: [_statusChip(skin)],
       ),
       body: Padding(
@@ -94,9 +94,9 @@ class _CasScreenState extends State<CasScreen> {
 
   Widget _statusChip(CalcSkin skin) {
     final (txt, col) = switch (_online) {
-      true => ('● サーバOK', const Color(0xFF3FAE7A)),
-      false => ('● オフライン', skin.accent),
-      _ => ('● 確認中', skin.inkSoft),
+      true => ('● Server OK', const Color(0xFF3FAE7A)),
+      false => ('● Offline', skin.accent),
+      _ => ('● Checking', skin.inkSoft),
     };
     return Center(
       child: Padding(
@@ -117,13 +117,13 @@ class _CasScreenState extends State<CasScreen> {
         controller: _ctrl,
         style: Kawaii.display(20).copyWith(color: skin.ink),
         decoration: InputDecoration(
-          hintText: 'しきを入力（例: x^2+3x+2, integrate, solve…）',
+          hintText: 'Enter an expression (e.g. x^2+3x+2)',
           hintStyle: Kawaii.ui(13, color: skin.inkSoft),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           suffixIcon: IconButton(
             icon: Icon(Icons.auto_awesome_rounded, color: skin.accent),
-            tooltip: 'ぜんぶ解析',
+            tooltip: 'Analyze',
             onPressed: () => _run('analyze'),
           ),
         ),
@@ -154,7 +154,7 @@ class _CasScreenState extends State<CasScreen> {
     final r = _resp;
     if (r == null) {
       return Center(
-        child: Text('しきを入れて、ボタンを押してね 🐱', style: Kawaii.ui(14, color: skin.inkSoft)),
+        child: Text('Enter an expression and tap a button 🐱', style: Kawaii.ui(14, color: skin.inkSoft)),
       );
     }
     if (!r.ok) {
@@ -164,9 +164,9 @@ class _CasScreenState extends State<CasScreen> {
           child: Column(mainAxisSize: MainAxisSize.min, children: [
             const Text('🙀', style: TextStyle(fontSize: 40)),
             const SizedBox(height: 12),
-            Text(r.error ?? 'エラー', textAlign: TextAlign.center, style: Kawaii.ui(14, color: skin.ink)),
+            Text(r.error ?? 'Error', textAlign: TextAlign.center, style: Kawaii.ui(14, color: skin.ink)),
             const SizedBox(height: 12),
-            Text('ヒント: backend フォルダで\nuvicorn main:app --port 8000\nを起動してね',
+            Text('Tip: start the backend with\nuvicorn main:app --port 8000',
                 textAlign: TextAlign.center, style: Kawaii.ui(12, color: skin.inkSoft)),
           ]),
         ),
@@ -183,7 +183,7 @@ class _CasScreenState extends State<CasScreen> {
   Widget _inputEcho(CalcSkin skin, String latex) => Padding(
         padding: const EdgeInsets.only(bottom: 8),
         child: Row(children: [
-          Text('入力: ', style: Kawaii.ui(12, color: skin.inkSoft)),
+          Text('Input: ', style: Kawaii.ui(12, color: skin.inkSoft)),
           Flexible(child: _tex(skin, latex, 18, skin.inkSoft)),
         ]),
       );

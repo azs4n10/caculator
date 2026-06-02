@@ -122,9 +122,9 @@ def analyze(req: CasRequest) -> dict[str, Any]:
         if not expr.free_symbols:
             # A constant — give exact and decimal forms.
             simp = sp.nsimplify(expr) if expr.is_number else sp.simplify(expr)
-            cards.append(_card("かんたんに", sp.simplify(expr)))
+            cards.append(_card("Simplified", sp.simplify(expr)))
             try:
-                cards.append(_card("しょうすう", sp.N(expr, 12)))
+                cards.append(_card("Decimal", sp.N(expr, 12)))
             except Exception:  # noqa: BLE001
                 pass
             return {"ok": True, "input_latex": sp.latex(expr), "results": cards}
@@ -137,12 +137,12 @@ def analyze(req: CasRequest) -> dict[str, Any]:
             except Exception:  # noqa: BLE001 — best-effort per card
                 pass
 
-        add("かんたんに", lambda: sp.simplify(expr))
-        add("展開", lambda: sp.expand(expr))
-        add("因数分解", lambda: sp.factor(expr))
-        add(f"微分 d/d{var}", lambda: sp.diff(expr, var))
-        add(f"積分 ∫d{var}", lambda: sp.integrate(expr, var))
-        add(f"= 0 の解 ({var})", lambda: sp.FiniteSet(*sp.solve(expr, var)))
+        add("Simplified", lambda: sp.simplify(expr))
+        add("Expanded", lambda: sp.expand(expr))
+        add("Factored", lambda: sp.factor(expr))
+        add(f"d/d{var}", lambda: sp.diff(expr, var))
+        add(f"∫ d{var}", lambda: sp.integrate(expr, var))
+        add(f"Solve = 0 ({var})", lambda: sp.FiniteSet(*sp.solve(expr, var)))
 
         return {"ok": True, "input_latex": sp.latex(expr), "results": cards}
     except Exception as e:  # noqa: BLE001
@@ -160,6 +160,6 @@ def _solve_equation(raw: str, var: str | None) -> dict[str, Any]:
         "ok": True,
         "input_latex": sp.latex(eq),
         "results": [
-            {"title": f"解 ({v})", "latex": sp.latex(sol_set), "text": str(sol_set)}
+            {"title": f"Solution ({v})", "latex": sp.latex(sol_set), "text": str(sol_set)}
         ],
     }

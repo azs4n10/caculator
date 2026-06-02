@@ -20,7 +20,7 @@ class _FnEntry {
   _FnEntry(String text, this.color) : ctrl = TextEditingController(text: text);
 }
 
-/// グラフ: plot y = f(x) for one or more functions, with pinch/drag zoom & pan,
+/// Graph: plot y = f(x) for one or more functions, with pinch/drag zoom & pan,
 /// and a value table.
 class GraphScreen extends StatefulWidget {
   final String initialExpr;
@@ -132,11 +132,11 @@ class _GraphScreenState extends State<GraphScreen> {
       appBar: AppBar(
         backgroundColor: skin.bgGradient.first,
         foregroundColor: skin.ink,
-        title: Text('グラフ 📈', style: Kawaii.ui(18, weight: FontWeight.w800, color: skin.ink)),
+        title: Text('Graph 📈', style: Kawaii.ui(18, weight: FontWeight.w800, color: skin.ink)),
         actions: [
           _angleToggle(skin),
           IconButton(
-            tooltip: '値テーブル',
+            tooltip: 'Value table',
             icon: Icon(Icons.table_chart_rounded, color: skin.accent),
             onPressed: () => _showTable(skin),
           ),
@@ -216,7 +216,7 @@ class _GraphScreenState extends State<GraphScreen> {
               child: TextButton.icon(
                 onPressed: _addFn,
                 icon: Icon(Icons.add_rounded, color: skin.accent, size: 20),
-                label: Text('関数を追加', style: Kawaii.ui(13, weight: FontWeight.w700, color: skin.accent)),
+                label: Text('Add function', style: Kawaii.ui(13, weight: FontWeight.w700, color: skin.accent)),
               ),
             ),
         ],
@@ -247,7 +247,7 @@ class _GraphScreenState extends State<GraphScreen> {
                 style: Kawaii.display(16).copyWith(color: skin.ink),
                 decoration: InputDecoration(
                   isDense: true,
-                  hintText: 'x の式（例: x^2-3, sin(x)）',
+                  hintText: 'f(x), e.g. x^2-3, sin(x)',
                   hintStyle: Kawaii.ui(12, color: skin.inkSoft),
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -306,7 +306,7 @@ class _GraphScreenState extends State<GraphScreen> {
               child: Row(children: [
                 Icon(Icons.table_chart_rounded, color: skin.accent),
                 const SizedBox(width: 8),
-                Text('値テーブル', style: Kawaii.ui(17, weight: FontWeight.w800, color: skin.ink)),
+                Text('Value table', style: Kawaii.ui(17, weight: FontWeight.w800, color: skin.ink)),
               ]),
             ),
             Expanded(

@@ -23,7 +23,7 @@ void main() {
     expect(tester.takeException(), isNull);
     expect(find.byType(CustomPaint), findsWidgets);
     // Seeded with sin(x) when no initial expression is given.
-    expect(find.text('関数を追加'), findsOneWidget);
+    expect(find.text('Add function'), findsOneWidget);
   });
 
   testWidgets('graph screen seeds from initial expression with x', (tester) async {

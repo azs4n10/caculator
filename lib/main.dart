@@ -37,7 +37,7 @@ class _KawaiiCalcAppState extends State<KawaiiCalcApp> {
       skin: _skin,
       onSelect: _select,
       child: MaterialApp(
-        title: 'ぷにぷに関数電卓',
+        title: 'Kawaii Calc',
         debugShowCheckedModeBanner: false,
         theme: buildAppTheme(_skin),
         home: const Scaffold(body: CalculatorScreen()),

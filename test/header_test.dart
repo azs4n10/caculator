@@ -23,13 +23,13 @@ void main() {
     final rad = tester.getRect(find.text('RAD'));
     final graph = tester.getRect(find.text('📈'));
     final cas = tester.getRect(find.text('∫'));
-    final hist = tester.getRect(find.text('履歴'));
+    final hist = tester.getRect(find.text('🕘'));
     // ignore: avoid_print
     print('RAD=$rad\nGRAPH=$graph\nCAS=$cas\nHIST=$hist');
 
     expect(rad.right, lessThanOrEqualTo(360), reason: 'RAD off-screen: $rad');
     expect(graph.right, lessThanOrEqualTo(360), reason: '📈 off-screen: $graph');
     expect(cas.right, lessThanOrEqualTo(360), reason: '∫ off-screen: $cas');
-    expect(hist.right, lessThanOrEqualTo(360), reason: '履歴 off-screen: $hist');
+    expect(hist.right, lessThanOrEqualTo(360), reason: '🕘 off-screen: $hist');
   });
 }
