@@ -6,16 +6,20 @@ import 'theme/skin.dart';
 /// once per build from the FontScope so every call picks up the user's choice.
 /// Colours live on [CalcSkin]; callers pass them via `.copyWith`/`color`.
 class Kawaii {
-  static String family = 'Baloo 2';
+  static String family = 'Quicksand';
+
+  // Cute typefaces top out at weight 700; keep below that so headings never
+  // fall back to a default font. Lighter weights also read as less "loud".
+  static FontWeight _cap(FontWeight w) => w.value > FontWeight.w700.value ? FontWeight.w700 : w;
 
   static TextStyle key(double size) =>
-      GoogleFonts.getFont(family, fontSize: size, fontWeight: FontWeight.w700, height: 1.0);
+      GoogleFonts.getFont(family, fontSize: size, fontWeight: FontWeight.w600, height: 1.0);
 
-  static TextStyle display(double size) => GoogleFonts.getFont(family,
-      fontSize: size, fontWeight: FontWeight.w700, letterSpacing: -0.5);
+  static TextStyle display(double size) =>
+      GoogleFonts.getFont(family, fontSize: size, fontWeight: FontWeight.w600, letterSpacing: -0.2);
 
   static TextStyle ui(double size, {FontWeight weight = FontWeight.w600, Color? color}) =>
-      GoogleFonts.getFont(family, fontSize: size, fontWeight: weight, color: color);
+      GoogleFonts.getFont(family, fontSize: size, fontWeight: _cap(weight), color: color);
 }
 
 ThemeData buildAppTheme(CalcSkin skin) {
