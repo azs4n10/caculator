@@ -32,13 +32,13 @@ const lavenderSkin = CalcSkin(
   dividerColor: Color(0xFFE3D6F5),
 );
 
-const mintPeachSkin = CalcSkin(
-  id: 'mint_peach', name: 'Mint Peach', isDark: false,
-  background: Color(0xFFF5F9F4), cardBackground: Color(0xFFFFF5EE),
-  digitColor: Color(0xFF5C8D89), accentColor: Color(0xFFFFB088),
-  buttonColor: Color(0xFF88C9BF), buttonTextColor: Color(0xFFFFFFFF),
-  primaryTextColor: Color(0xFF4A6B68), subTextColor: Color(0xFF9CB6B0),
-  dividerColor: Color(0xFFDDE8E0),
+const sodaSkin = CalcSkin(
+  id: 'soda', name: 'Soda', isDark: false,
+  background: Color(0xFFE3EEF6), cardBackground: Color(0xFFE9F2FB),
+  digitColor: Color(0xFF4E83B4), accentColor: Color(0xFF8FB9E6),
+  buttonColor: Color(0xFF93C2EA), buttonTextColor: Color(0xFFFFFFFF),
+  primaryTextColor: Color(0xFF44607C), subTextColor: Color(0xFF93A7BC),
+  dividerColor: Color(0xFFD3E2EF),
 );
 
 const beigeRoseSkin = CalcSkin(
@@ -106,7 +106,7 @@ const charcoalRoseSkin = CalcSkin(
 );
 
 const List<CalcSkin> lightSkins = [
-  milkPinkSkin, yumekawaSkin, lavenderSkin, mintPeachSkin, beigeRoseSkin, sugarPinkSkin,
+  milkPinkSkin, yumekawaSkin, lavenderSkin, sodaSkin, beigeRoseSkin, sugarPinkSkin,
 ];
 const List<CalcSkin> darkSkins = [
   nightStarSkin, midnightPlumSkin, cocoaNightSkin, galaxySkin, charcoalRoseSkin,
