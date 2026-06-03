@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'cas/cas_screen.dart';
+import 'settings.dart';
 import 'engine.dart';
 import 'graph/graph_screen.dart';
 import 'theme.dart';
@@ -123,7 +123,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   void _insert(String ins) {
-    HapticFeedback.lightImpact();
+    tapHaptic();
     setState(() {
       if (ins == '__ANS__') ins = _result.isEmpty ? '' : _result;
       if (_justEvaluated) {
@@ -149,7 +149,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
   void _evaluate() {
     if (_expr.trim().isEmpty) return;
-    HapticFeedback.mediumImpact();
+    mediumHaptic();
     final r = _engine.evaluate(_expr, angle: _angle);
     setState(() {
       if (r.ok) {
@@ -283,44 +283,43 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           ),
           _angleToggle(skin),
           const SizedBox(width: 5),
-          _iconChip(skin, Icons.palette_rounded, skin.accent, _openSkinPicker),
+          _iconChip(skin, Icons.show_chart_rounded, _openGraph),
           const SizedBox(width: 5),
-          _iconChip(skin, Icons.show_chart_rounded, skin.accent, _openGraph),
+          _chip(skin, '∫', _openCas),
           const SizedBox(width: 5),
-          _chip(skin, '∫', skin.accent, _openCas),
+          _iconChip(skin, Icons.history_rounded, _showHistory),
           const SizedBox(width: 5),
-          _iconChip(skin, Icons.history_rounded, skin.inkSoft, _showHistory),
+          _iconChip(skin, Icons.settings_rounded, _openSettings),
         ],
       ),
     );
   }
 
-  Widget _chip(CalcSkin skin, String label, Color color, VoidCallback onTap) {
+  // Header buttons share the RAD chip's look: filled, edged, ink-coloured.
+  BoxDecoration _chipDeco(CalcSkin skin) => BoxDecoration(
+        color: skin.funcFill,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: skin.funcEdge),
+      );
+
+  Widget _chip(CalcSkin skin, String label, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-        decoration: BoxDecoration(
-          color: skin.chipBg,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: color.withValues(alpha: 0.5)),
-        ),
-        child: Text(label, style: Kawaii.ui(13, weight: FontWeight.w800, color: color)),
+        padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
+        decoration: _chipDeco(skin),
+        child: Text(label, style: Kawaii.ui(14, weight: FontWeight.w800, color: skin.ink)),
       ),
     );
   }
 
-  Widget _iconChip(CalcSkin skin, IconData icon, Color color, VoidCallback onTap) {
+  Widget _iconChip(CalcSkin skin, IconData icon, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(7),
-        decoration: BoxDecoration(
-          color: skin.chipBg,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: color.withValues(alpha: 0.5)),
-        ),
-        child: Icon(icon, size: 18, color: color),
+        decoration: _chipDeco(skin),
+        child: Icon(icon, size: 19, color: skin.ink),
       ),
     );
   }
@@ -329,7 +328,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     return GestureDetector(
       onTap: () => setState(() {
         _angle = _angle == AngleMode.rad ? AngleMode.deg : AngleMode.rad;
-        HapticFeedback.selectionClick();
+        selectHaptic();
         _recompute();
       }),
       child: Container(
@@ -382,7 +381,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     return GestureDetector(
       onTap: () => setState(() {
         _funcOpen = !_funcOpen;
-        HapticFeedback.selectionClick();
+        selectHaptic();
       }),
       child: Container(
         height: 40,
@@ -533,6 +532,81 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
       builder: (_) => const SkinPicker(),
+    );
+  }
+
+  void _openSettings() {
+    final skin = SkinScope.skinOf(context);
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: skin.paper,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
+      builder: (_) => StatefulBuilder(
+        builder: (sheetCtx, setSheet) => SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(child: Container(width: 44, height: 5, decoration: BoxDecoration(color: skin.divider, borderRadius: BorderRadius.circular(3)))),
+                const SizedBox(height: 14),
+                Row(children: [
+                  Icon(Icons.settings_rounded, color: skin.accent),
+                  const SizedBox(width: 8),
+                  Text('Settings', style: Kawaii.ui(18, weight: FontWeight.w800, color: skin.ink)),
+                ]),
+                const SizedBox(height: 18),
+                // Angle
+                Row(children: [
+                  Expanded(child: Text('Angle', style: Kawaii.ui(15, weight: FontWeight.w700, color: skin.ink))),
+                  for (final m in AngleMode.values) ...[
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _angle = m;
+                          _recompute();
+                        });
+                        setSheet(() {});
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.only(left: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: _angle == m ? skin.accent : skin.funcFill,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: skin.funcEdge),
+                        ),
+                        child: Text(m == AngleMode.rad ? 'RAD' : 'DEG',
+                            style: Kawaii.ui(13, weight: FontWeight.w800, color: _angle == m ? skin.buttonTextColor : skin.ink)),
+                      ),
+                    ),
+                  ],
+                ]),
+                const SizedBox(height: 6),
+                // Haptics
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text('Haptic feedback', style: Kawaii.ui(15, weight: FontWeight.w700, color: skin.ink)),
+                  value: hapticsEnabled,
+                  onChanged: (v) => setSheet(() => setHaptics(v)),
+                ),
+                // Appearance
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: Icon(Icons.palette_rounded, color: skin.accent),
+                  title: Text('Theme, font & texture', style: Kawaii.ui(15, weight: FontWeight.w700, color: skin.ink)),
+                  trailing: Icon(Icons.chevron_right_rounded, color: skin.inkSoft),
+                  onTap: () {
+                    Navigator.pop(sheetCtx);
+                    _openSkinPicker();
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 

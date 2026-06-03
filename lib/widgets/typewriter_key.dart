@@ -1,6 +1,6 @@
 import 'dart:ui' show ImageFilter;
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import '../settings.dart';
 import '../theme.dart';
 import '../theme/key_texture.dart';
 import 'keycap_painter.dart';
@@ -37,7 +37,7 @@ class _TypewriterKeyState extends State<TypewriterKey> {
   bool _down = false;
 
   void _press() {
-    HapticFeedback.lightImpact();
+    tapHaptic();
     widget.onTap();
   }
 
