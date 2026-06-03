@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'calculator_screen.dart';
+import 'settings.dart';
 import 'theme.dart';
 import 'theme/fonts.dart';
 import 'theme/font_scope.dart';
@@ -19,6 +20,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await loadKeycapShader();
   final prefs = await SharedPreferences.getInstance();
+  initSettings(prefs);
   runApp(KawaiiCalcApp(prefs: prefs));
 }
 
