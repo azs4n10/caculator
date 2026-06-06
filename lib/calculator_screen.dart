@@ -10,6 +10,11 @@ import 'theme/skin.dart';
 import 'theme/skin_picker.dart';
 import 'theme/skin_scope.dart';
 import 'theme/texture_scope.dart';
+import 'tools/circle_screen.dart';
+import 'tools/countries.dart';
+import 'tools/country_picker.dart';
+import 'tools/currency_screen.dart';
+import 'tools/tax_screen.dart';
 import 'widgets/typewriter_key.dart';
 
 class HistoryEntry {
@@ -376,6 +381,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           const SizedBox(width: 5),
           _iconChip(skin, Icons.history_rounded, _showHistory),
           const SizedBox(width: 5),
+          _iconChip(skin, Icons.grid_view_rounded, _openTools),
+          const SizedBox(width: 5),
           _iconChip(skin, Icons.settings_rounded, _openSettings),
         ],
       ),
@@ -671,6 +678,50 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     ));
   }
 
+  void _openTools() {
+    final skin = SkinScope.skinOf(context);
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: skin.paper,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
+      builder: (sheetCtx) {
+        Widget tile(IconData icon, String title, String sub, Widget screen) => ListTile(
+              leading: Icon(icon, color: skin.accent),
+              title: Text(title, style: Kawaii.ui(15, weight: FontWeight.w800, color: skin.ink)),
+              subtitle: Text(sub, style: Kawaii.ui(12.5, color: skin.inkSoft)),
+              trailing: Icon(Icons.chevron_right_rounded, color: skin.inkSoft),
+              onTap: () {
+                Navigator.pop(sheetCtx);
+                Navigator.of(context).push(MaterialPageRoute(builder: (_) => screen));
+              },
+            );
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(8, 12, 8, 12),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(child: Container(width: 44, height: 5, decoration: BoxDecoration(color: skin.divider, borderRadius: BorderRadius.circular(3)))),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 14, 12, 6),
+                  child: Row(children: [
+                    Icon(Icons.grid_view_rounded, color: skin.accent),
+                    const SizedBox(width: 8),
+                    Text('Tools', style: Kawaii.ui(18, weight: FontWeight.w800, color: skin.ink)),
+                  ]),
+                ),
+                tile(Icons.circle_outlined, 'Circle', 'Radius, diameter, circumference, area', const CircleScreen()),
+                tile(Icons.percent_rounded, 'Tax', 'Add or remove a country\'s tax', const TaxScreen()),
+                tile(Icons.currency_exchange_rounded, 'Currency', 'Live exchange rates', const CurrencyScreen()),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   void _openSkinPicker() {
     showModalBottomSheet(
       context: context,
@@ -738,6 +789,22 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   title: Text('Haptic feedback', style: Kawaii.ui(15, weight: FontWeight.w700, color: skin.ink)),
                   value: hapticsEnabled,
                   onChanged: (v) => setSheet(() => setHaptics(v)),
+                ),
+                // Country (drives the Tax tool's default rate & currency)
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: Icon(Icons.public_rounded, color: skin.accent),
+                  title: Text('Country', style: Kawaii.ui(15, weight: FontWeight.w700, color: skin.ink)),
+                  subtitle: Text('${countryByCode(countryCode).name} · ${countryByCode(countryCode).taxName} ${trimRate(countryByCode(countryCode).taxRate)}%',
+                      style: Kawaii.ui(12.5, color: skin.inkSoft)),
+                  trailing: Icon(Icons.chevron_right_rounded, color: skin.inkSoft),
+                  onTap: () async {
+                    final picked = await showCountryPicker(sheetCtx, skin, countryByCode(countryCode));
+                    if (picked != null) {
+                      setCountry(picked.code);
+                      setSheet(() {});
+                    }
+                  },
                 ),
                 // Appearance
                 ListTile(
