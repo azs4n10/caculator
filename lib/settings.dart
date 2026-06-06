@@ -7,14 +7,24 @@ SharedPreferences? _prefs;
 
 bool hapticsEnabled = true;
 
+/// ISO 3166-1 alpha-2 code of the user's selected country. Drives the tax
+/// calculator's default rate/label and the converter's default currency.
+String countryCode = 'JP';
+
 void initSettings(SharedPreferences prefs) {
   _prefs = prefs;
   hapticsEnabled = prefs.getBool('haptics') ?? true;
+  countryCode = prefs.getString('country') ?? 'JP';
 }
 
 void setHaptics(bool v) {
   hapticsEnabled = v;
   _prefs?.setBool('haptics', v);
+}
+
+void setCountry(String code) {
+  countryCode = code;
+  _prefs?.setString('country', code);
 }
 
 void tapHaptic() {
