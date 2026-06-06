@@ -57,7 +57,7 @@ class _CurrencyScreenState extends State<CurrencyScreen> {
       _error = null;
     });
     try {
-      final uri = Uri.parse('https://api.frankfurter.app/latest?from=$_from');
+      final uri = Uri.parse('https://api.frankfurter.dev/v1/latest?from=$_from');
       final res = await http.get(uri).timeout(const Duration(seconds: 10));
       if (res.statusCode != 200) throw Exception('HTTP ${res.statusCode}');
       final body = jsonDecode(res.body) as Map<String, dynamic>;
