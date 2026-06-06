@@ -117,7 +117,8 @@ class _CurrencyScreenState extends State<CurrencyScreen> {
       title: 'Currency',
       icon: Icons.currency_exchange_rounded,
       actions: [
-        useInCalcAction(context, skin, () => out == null ? null : bareNumber(out)),
+        useInCalcAction(context, skin,
+            () => out == null ? null : bareNumber(out, decimals: currencyDecimals(_to))),
         IconButton(
           tooltip: 'Refresh rates',
           icon: Icon(Icons.refresh_rounded, color: skin.accent),
