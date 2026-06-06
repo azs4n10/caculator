@@ -8,6 +8,7 @@ import '../theme.dart';
 import '../theme/skin.dart';
 import '../theme/skin_scope.dart';
 import 'countries.dart';
+import 'tool_ui.dart';
 
 /// Currencies supported by the Frankfurter (ECB) API.
 const _currencies = <String>[
@@ -16,12 +17,16 @@ const _currencies = <String>[
   'PLN', 'SEK', 'SGD', 'THB', 'TRY', 'USD', 'ZAR',
 ];
 
+// A few popular targets shown together under the main result.
+const _popular = ['USD', 'EUR', 'JPY', 'GBP', 'CNY', 'KRW', 'AUD'];
+
 // Last fetched rates per base, kept across screen opens for an offline fallback.
 final Map<String, Map<String, double>> _rateCache = {};
 String? _ratesDate;
 
 class CurrencyScreen extends StatefulWidget {
-  const CurrencyScreen({super.key});
+  final String? initialAmount;
+  const CurrencyScreen({super.key, this.initialAmount});
   @override
   State<CurrencyScreen> createState() => _CurrencyScreenState();
 }
@@ -29,7 +34,7 @@ class CurrencyScreen extends StatefulWidget {
 class _CurrencyScreenState extends State<CurrencyScreen> {
   late String _from = _initialFrom();
   String _to = 'USD';
-  final _amount = TextEditingController(text: '1');
+  late final _amount = TextEditingController(text: widget.initialAmount ?? '1');
   bool _loading = false;
   String? _error;
 
@@ -79,140 +84,135 @@ class _CurrencyScreenState extends State<CurrencyScreen> {
     }
   }
 
-  double? get _converted {
+  double? _convert(String to) {
     final a = double.tryParse(_amount.text.trim());
     final rates = _rateCache[_from];
     if (a == null || rates == null) return null;
-    final r = rates[_to];
-    if (r == null) return null;
-    return a * r;
+    final r = rates[to];
+    return r == null ? null : a * r;
+  }
+
+  void _useBase(String code) {
+    setState(() => _from = code);
+    _rateCache.containsKey(code) ? setState(() {}) : _fetch();
   }
 
   void _swap() {
+    final t = _from;
     setState(() {
-      final t = _from;
       _from = _to;
       _to = t;
     });
-    if (!_rateCache.containsKey(_from)) {
-      _fetch();
-    } else {
-      setState(() {});
-    }
+    if (!_rateCache.containsKey(_from)) _fetch();
   }
 
   @override
   Widget build(BuildContext context) {
     final skin = SkinScope.skinOf(context);
-    final out = _converted;
+    final out = _convert(_to);
     final rate = _rateCache[_from]?[_to];
 
-    return Scaffold(
-      backgroundColor: skin.background,
-      appBar: AppBar(
-        backgroundColor: skin.bgGradient.first,
-        foregroundColor: skin.ink,
-        title: Text('Currency', style: Kawaii.ui(18, weight: FontWeight.w800, color: skin.ink)),
-        actions: [
-          IconButton(
-            tooltip: 'Refresh rates',
-            icon: Icon(Icons.refresh_rounded, color: skin.accent),
-            onPressed: _loading ? null : _fetch,
+    return ToolScaffold(
+      skin: skin,
+      title: 'Currency',
+      icon: Icons.currency_exchange_rounded,
+      actions: [
+        useInCalcAction(context, skin, () => out == null ? null : bareNumber(out)),
+        IconButton(
+          tooltip: 'Refresh rates',
+          icon: Icon(Icons.refresh_rounded, color: skin.accent),
+          onPressed: _loading ? null : _fetch,
+        ),
+      ],
+      child: ListView(
+        padding: const EdgeInsets.all(18),
+        children: [
+          TextField(
+            controller: _amount,
+            autofocus: true,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
+            onChanged: (_) => setState(() {}),
+            style: Kawaii.display(28).copyWith(color: skin.ink),
+            decoration: kawaiiInput(skin, 'Amount'),
           ),
-        ],
-      ),
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(18),
-          children: [
-            TextField(
-              controller: _amount,
-              autofocus: true,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
-              onChanged: (_) => setState(() {}),
-              style: Kawaii.display(28).copyWith(color: skin.ink),
-              decoration: InputDecoration(
-                labelText: 'Amount',
-                labelStyle: Kawaii.ui(14, weight: FontWeight.w700, color: skin.inkSoft),
-                filled: true,
-                fillColor: skin.paper,
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(18),
-                  borderSide: BorderSide(color: skin.divider),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(18),
-                  borderSide: BorderSide(color: skin.accent, width: 2),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(child: _picker(skin, 'From', _from, (v) {
-                  setState(() => _from = v);
-                  _rateCache.containsKey(v) ? setState(() {}) : _fetch();
-                })),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: GestureDetector(
-                    onTap: _swap,
-                    child: Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: skin.funcFill,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: skin.funcEdge),
-                      ),
-                      child: Icon(Icons.swap_horiz_rounded, color: skin.ink),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(child: _picker(skin, _from, _useBase)),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: GestureDetector(
+                  onTap: _swap,
+                  child: Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: skin.funcFill,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: skin.funcEdge),
                     ),
+                    child: Icon(Icons.swap_horiz_rounded, color: skin.ink),
                   ),
                 ),
-                Expanded(child: _picker(skin, 'To', _to, (v) => setState(() => _to = v))),
+              ),
+              Expanded(child: _picker(skin, _to, (v) => setState(() => _to = v))),
+            ],
+          ),
+          const SizedBox(height: 22),
+          toolCard(
+            skin,
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 22),
+            child: Column(
+              children: [
+                if (_loading)
+                  SizedBox(height: 30, width: 30, child: CircularProgressIndicator(strokeWidth: 3, color: skin.accent))
+                else ...[
+                  Text(out == null ? '—' : formatMoney(out, _to),
+                      style: Kawaii.display(34).copyWith(color: skin.accent)),
+                  const SizedBox(height: 8),
+                  if (rate != null)
+                    Text('1 $_from = ${CalculatorEngine.formatNumber(double.parse(rate.toStringAsFixed(4)))} $_to',
+                        style: Kawaii.ui(13, weight: FontWeight.w600, color: skin.inkSoft)),
+                ],
               ],
             ),
-            const SizedBox(height: 24),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 22),
-              decoration: BoxDecoration(
-                color: skin.paper,
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: skin.divider),
-              ),
+          ),
+          const SizedBox(height: 16),
+          if (!_loading && _rateCache.containsKey(_from)) ...[
+            Text('In other currencies', style: Kawaii.ui(14, weight: FontWeight.w700, color: skin.inkSoft)),
+            const SizedBox(height: 10),
+            toolCard(
+              skin,
               child: Column(
                 children: [
-                  if (_loading)
-                    SizedBox(
-                      height: 30,
-                      width: 30,
-                      child: CircularProgressIndicator(strokeWidth: 3, color: skin.accent),
-                    )
-                  else ...[
-                    Text(
-                      out == null ? '—' : '${CalculatorEngine.formatNumber(double.parse(out.toStringAsFixed(2)))} $_to',
-                      style: Kawaii.display(34).copyWith(color: skin.accent),
+                  for (final code in _popular.where((c) => c != _from)) ...[
+                    if (code != _popular.firstWhere((c) => c != _from)) Divider(height: 1, color: skin.divider),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 11),
+                      child: Row(
+                        children: [
+                          Expanded(child: Text(code, style: Kawaii.ui(15, weight: FontWeight.w700, color: skin.inkSoft))),
+                          Text(_convert(code) == null ? '—' : formatMoney(_convert(code)!, code),
+                              style: Kawaii.display(18).copyWith(color: skin.ink)),
+                        ],
+                      ),
                     ),
-                    const SizedBox(height: 8),
-                    if (rate != null)
-                      Text('1 $_from = ${CalculatorEngine.formatNumber(double.parse(rate.toStringAsFixed(4)))} $_to',
-                          style: Kawaii.ui(13, weight: FontWeight.w600, color: skin.inkSoft)),
                   ],
                 ],
               ),
             ),
-            const SizedBox(height: 14),
-            if (_error != null)
-              Center(child: Text(_error!, textAlign: TextAlign.center, style: Kawaii.ui(13, weight: FontWeight.w600, color: skin.inkSoft)))
-            else if (_ratesDate != null)
-              Center(child: Text('ECB rates · $_ratesDate', style: Kawaii.ui(12, weight: FontWeight.w600, color: skin.inkSoft))),
           ],
-        ),
+          const SizedBox(height: 14),
+          if (_error != null)
+            Center(child: Text(_error!, textAlign: TextAlign.center, style: Kawaii.ui(13, weight: FontWeight.w600, color: skin.inkSoft)))
+          else if (_ratesDate != null)
+            Center(child: Text('ECB rates · $_ratesDate', style: Kawaii.ui(12, weight: FontWeight.w600, color: skin.inkSoft))),
+        ],
       ),
     );
   }
 
-  Widget _picker(CalcSkin skin, String label, String value, ValueChanged<String> onChanged) {
+  Widget _picker(CalcSkin skin, String value, ValueChanged<String> onChanged) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
       decoration: BoxDecoration(

@@ -14,6 +14,7 @@ import 'tools/circle_screen.dart';
 import 'tools/countries.dart';
 import 'tools/country_picker.dart';
 import 'tools/currency_screen.dart';
+import 'tools/split_screen.dart';
 import 'tools/tax_screen.dart';
 import 'widgets/typewriter_key.dart';
 
@@ -678,6 +679,31 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     ));
   }
 
+  /// The current value (evaluated) to seed a tool's first field with, or null.
+  String? _seedValue() {
+    if (_justEvaluated && _result.isNotEmpty) return _result;
+    if (_expr.trim().isEmpty) return null;
+    final r = _engine.evaluate(_expr, angle: _angle);
+    return r.ok ? r.text : null;
+  }
+
+  /// Opens a tool seeded with the current value; if the tool returns a number
+  /// ("use in calculator"), it replaces the expression.
+  void _openTool(Widget Function(String? seed) build) async {
+    final seed = _seedValue();
+    final res = await Navigator.of(context).push<String>(
+      MaterialPageRoute(builder: (_) => build(seed)),
+    );
+    if (res != null && res.isNotEmpty) {
+      setState(() {
+        _expr = res;
+        _result = '';
+        _justEvaluated = false;
+        _recompute();
+      });
+    }
+  }
+
   void _openTools() {
     final skin = SkinScope.skinOf(context);
     showModalBottomSheet(
@@ -685,14 +711,14 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       backgroundColor: skin.paper,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
       builder: (sheetCtx) {
-        Widget tile(IconData icon, String title, String sub, Widget screen) => ListTile(
+        Widget tile(IconData icon, String title, String sub, Widget Function(String?) build) => ListTile(
               leading: Icon(icon, color: skin.accent),
               title: Text(title, style: Kawaii.ui(15, weight: FontWeight.w800, color: skin.ink)),
               subtitle: Text(sub, style: Kawaii.ui(12.5, color: skin.inkSoft)),
               trailing: Icon(Icons.chevron_right_rounded, color: skin.inkSoft),
               onTap: () {
                 Navigator.pop(sheetCtx);
-                Navigator.of(context).push(MaterialPageRoute(builder: (_) => screen));
+                _openTool(build);
               },
             );
         return SafeArea(
@@ -711,9 +737,14 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     Text('Tools', style: Kawaii.ui(18, weight: FontWeight.w800, color: skin.ink)),
                   ]),
                 ),
-                tile(Icons.circle_outlined, 'Circle', 'Radius, diameter, circumference, area', const CircleScreen()),
-                tile(Icons.percent_rounded, 'Tax', 'Add or remove a country\'s tax', const TaxScreen()),
-                tile(Icons.currency_exchange_rounded, 'Currency', 'Live exchange rates', const CurrencyScreen()),
+                tile(Icons.circle_outlined, 'Circle', 'Radius, diameter, circumference, area, sphere',
+                    (s) => CircleScreen(initialValue: s)),
+                tile(Icons.percent_rounded, 'Tax', 'Add or remove a country\'s tax',
+                    (s) => TaxScreen(initialValue: s)),
+                tile(Icons.currency_exchange_rounded, 'Currency', 'Live exchange rates',
+                    (s) => CurrencyScreen(initialAmount: s)),
+                tile(Icons.groups_rounded, 'Split', 'Split a bill, with optional tip',
+                    (s) => SplitScreen(initialValue: s)),
               ],
             ),
           ),
