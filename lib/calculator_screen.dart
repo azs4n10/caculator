@@ -64,7 +64,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     _K('7'), _K('8'), _K('9'), _K('×', insert: '×', cat: _Cat.op),
     _K('4'), _K('5'), _K('6'), _K('−', insert: '−', cat: _Cat.op),
     _K('1'), _K('2'), _K('3'), _K('+', insert: '+', cat: _Cat.op),
-    _K('±', act: _Act.sign, cat: _Cat.op),
+    _K('+/−', act: _Act.sign, cat: _Cat.op),
     _K('0'),
     _K('.', insert: '.'),
     _K('=', act: _Act.equals, cat: _Cat.mint),
@@ -179,10 +179,17 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     _texture = TextureScope.textureOf(context);
     return Container(
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: skin.bgGradient,
+        // Subtle radial vignette gives the backdrop depth so keys don't float
+        // on a flat colour.
+        gradient: RadialGradient(
+          center: const Alignment(0, -0.28),
+          radius: 1.2,
+          colors: [
+            Color.lerp(skin.background, Colors.white, skin.isDark ? 0.0 : 0.05)!,
+            skin.background,
+            Color.lerp(skin.background, Colors.black, skin.isDark ? 0.12 : 0.07)!,
+          ],
+          stops: const [0.0, 0.5, 1.0],
         ),
       ),
       child: SafeArea(

@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart' show PointerScrollEvent;
 import 'package:flutter/material.dart';
 import '../engine.dart';
 import '../theme.dart';
@@ -120,6 +121,21 @@ class _GraphScreenState extends State<GraphScreen> {
     });
   }
 
+  /// Zoom the viewport by [factor] (>1 zooms out, <1 zooms in) keeping the
+  /// data point under [local] fixed. Used by both the mouse wheel and the
+  /// on-screen +/- buttons.
+  void _zoomAt(double factor, Offset local, Size size) {
+    setState(() {
+      final w = size.width, h = size.height;
+      final fx = _xMin + local.dx / w * (_xMax - _xMin);
+      final fy = _yMax - local.dy / h * (_yMax - _yMin);
+      _xMin = fx + (_xMin - fx) * factor;
+      _xMax = fx + (_xMax - fx) * factor;
+      _yMin = fy + (_yMin - fy) * factor;
+      _yMax = fy + (_yMax - fy) * factor;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final skin = SkinScope.skinOf(context);
@@ -156,15 +172,26 @@ class _GraphScreenState extends State<GraphScreen> {
                       child: LayoutBuilder(
                         builder: (_, c) {
                           final size = Size(c.maxWidth, c.maxHeight);
-                          return GestureDetector(
-                            onScaleStart: _onScaleStart,
-                            onScaleUpdate: (d) => _onScaleUpdate(d, size),
-                            child: CustomPaint(
-                              size: size,
-                              painter: GraphPainter(
-                                fns: plots,
-                                xMin: _xMin, xMax: _xMax, yMin: _yMin, yMax: _yMax,
-                                skin: skin,
+                          return Listener(
+                            // Mouse-wheel zoom around the cursor (scroll up =
+                            // zoom in). Finger pinch is handled by the scale
+                            // gesture below.
+                            onPointerSignal: (s) {
+                              if (s is PointerScrollEvent) {
+                                final factor = s.scrollDelta.dy > 0 ? 1.12 : 1 / 1.12;
+                                _zoomAt(factor, s.localPosition, size);
+                              }
+                            },
+                            child: GestureDetector(
+                              onScaleStart: _onScaleStart,
+                              onScaleUpdate: (d) => _onScaleUpdate(d, size),
+                              child: CustomPaint(
+                                size: size,
+                                painter: GraphPainter(
+                                  fns: plots,
+                                  xMin: _xMin, xMax: _xMax, yMin: _yMin, yMax: _yMax,
+                                  skin: skin,
+                                ),
                               ),
                             ),
                           );
