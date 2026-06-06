@@ -102706,7 +102706,7 @@ pe(){var s=0,r=A.Y(t.H),q=1,p=[],o=this,n,m,l,k,j,i,h,g
 var $async$pe=A.Z(function(a,b){if(a===1){p.push(b)
 s=q}for(;;)switch(s){case 0:o.aa(new A.b0u(o))
 q=3
-n=A.N1("https://api.frankfurter.app/latest?from="+o.gjG(),0,null)
+n=A.N1("https://api.frankfurter.dev/v1/latest?from="+o.gjG(),0,null)
 s=6
 return A.U(A.bRO(n).xW(B.apd),$async$pe)
 case 6:m=b
