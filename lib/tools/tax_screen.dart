@@ -27,6 +27,9 @@ class _TaxScreenState extends State<TaxScreen> {
     super.dispose();
   }
 
+  bool _rateIs(double r) => (double.tryParse(_rate.text.trim()) ?? -1) == r;
+  void _setRate(double r) => setState(() => _rate.text = trimRate(r));
+
   void _pickCountry() async {
     final skin = SkinScope.skinOf(context);
     final picked = await showCountryPicker(context, skin, _country);
@@ -86,6 +89,20 @@ class _TaxScreenState extends State<TaxScreen> {
                 ],
               ),
             ),
+          ),
+          const SizedBox(height: 12),
+          // Rate presets — standard vs the reduced rate (e.g. Japan's 8% on
+          // food). The rate field stays editable for anything custom.
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              selectChip(skin, 'Standard ${trimRate(_country.taxRate)}%',
+                  _rateIs(_country.taxRate), () => _setRate(_country.taxRate)),
+              if (_country.reducedRate != null)
+                selectChip(skin, 'Reduced ${trimRate(_country.reducedRate!)}%',
+                    _rateIs(_country.reducedRate!), () => _setRate(_country.reducedRate!)),
+            ],
           ),
           const SizedBox(height: 16),
           Row(

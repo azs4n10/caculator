@@ -35,6 +35,20 @@ void main() {
     expect(find.textContaining('10 JPY'), findsWidgets); // tax portion
   });
 
+  testWidgets('tax: reduced rate preset → 100 becomes 108', (tester) async {
+    await tester.pumpWidget(const MaterialApp(home: TaxScreen()));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField).first, '100');
+    await tester.pump();
+
+    // Japan's reduced rate is 8% (food etc.).
+    await tester.tap(find.text('Reduced 8%'));
+    await tester.pump();
+
+    expect(find.textContaining('108 JPY'), findsWidgets);
+  });
+
   testWidgets('split: 100 between 2 people → 50 each', (tester) async {
     await tester.pumpWidget(const MaterialApp(home: SplitScreen()));
     await tester.pumpAndSettle();
