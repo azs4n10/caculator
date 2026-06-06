@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'cas/cas_screen.dart';
 import 'settings.dart';
 import 'engine.dart';
@@ -138,6 +139,76 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     });
   }
 
+  // Function/constant vocabulary for autocomplete: (typed name, what to insert).
+  static const _vocab = <(String, String)>[
+    ('sin', 'sin('), ('cos', 'cos('), ('tan', 'tan('),
+    ('arcsin', 'arcsin('), ('arccos', 'arccos('), ('arctan', 'arctan('),
+    ('ln', 'ln('), ('log', 'log('), ('sqrt', '√('), ('abs', 'abs('),
+    ('pi', 'π'),
+  ];
+
+  /// Completions matching the run of letters at the end of the expression.
+  /// Empty when the expression doesn't end in a partial identifier.
+  List<(String, String)> get _suggestions {
+    final m = RegExp(r'[A-Za-z]+$').firstMatch(_expr);
+    if (m == null) return const [];
+    final p = m.group(0)!.toLowerCase();
+    final out = <(String, String)>[];
+    for (final v in _vocab) {
+      if (v.$1.startsWith(p)) out.add(v);
+      if (out.length >= 6) break;
+    }
+    return out;
+  }
+
+  /// Replaces the trailing partial identifier with a full function/constant.
+  void _acceptSuggestion(String insert) {
+    selectHaptic();
+    setState(() {
+      final m = RegExp(r'[A-Za-z]+$').firstMatch(_expr);
+      if (m != null) _expr = _expr.substring(0, m.start);
+      _expr += insert;
+      _recompute();
+    });
+  }
+
+  // Physical-keyboard support (PC / web). Tab accepts the top suggestion.
+  KeyEventResult _handleKey(FocusNode node, KeyEvent e) {
+    if (e is! KeyDownEvent && e is! KeyRepeatEvent) return KeyEventResult.ignored;
+    final k = e.logicalKey;
+    if (k == LogicalKeyboardKey.tab) {
+      final s = _suggestions;
+      if (s.isEmpty) return KeyEventResult.ignored;
+      _acceptSuggestion(s.first.$2);
+      return KeyEventResult.handled;
+    }
+    if (k == LogicalKeyboardKey.enter || k == LogicalKeyboardKey.numpadEnter) {
+      _evaluate();
+      return KeyEventResult.handled;
+    }
+    if (k == LogicalKeyboardKey.backspace) {
+      _onKey(const _K('⌫', act: _Act.back, cat: _Cat.pink));
+      return KeyEventResult.handled;
+    }
+    if (k == LogicalKeyboardKey.escape) {
+      _onKey(const _K('C', act: _Act.clear, cat: _Cat.pink));
+      return KeyEventResult.handled;
+    }
+    final ch = e.character;
+    if (ch != null && ch.length == 1) {
+      if (ch == '=') {
+        _evaluate();
+        return KeyEventResult.handled;
+      }
+      const map = {'*': '×', '/': '÷', '-': '−'};
+      if (RegExp(r'^[0-9A-Za-z.+\-*/^!%()]$').hasMatch(ch)) {
+        _insert(map[ch] ?? ch);
+        return KeyEventResult.handled;
+      }
+    }
+    return KeyEventResult.ignored;
+  }
+
   void _recompute() {
     if (_expr.trim().isEmpty) {
       _preview = '';
@@ -193,13 +264,17 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         ),
       ),
       child: SafeArea(
-        child: LayoutBuilder(
-          builder: (_, c) {
-            // Wide / landscape: put functions beside the number pad so keys stay
-            // big instead of shrinking to the (short) height.
-            final wide = c.maxWidth > c.maxHeight * 1.25;
-            return wide ? _landscapeBody(skin) : _portraitBody(skin);
-          },
+        child: Focus(
+          autofocus: true,
+          onKeyEvent: _handleKey,
+          child: LayoutBuilder(
+            builder: (_, c) {
+              // Wide / landscape: put functions beside the number pad so keys
+              // stay big instead of shrinking to the (short) height.
+              final wide = c.maxWidth > c.maxHeight * 1.25;
+              return wide ? _landscapeBody(skin) : _portraitBody(skin);
+            },
+          ),
         ),
       ),
     );
@@ -215,6 +290,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             padding: const EdgeInsets.fromLTRB(18, 6, 18, 18),
             child: Column(
               children: [
+                _suggestionBar(skin),
                 AnimatedSize(
                   duration: const Duration(milliseconds: 220),
                   curve: Curves.easeOutCubic,
@@ -236,6 +312,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       children: [
         _header(skin),
         _display(skin, compact: true),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 18),
+          child: _suggestionBar(skin),
+        ),
         Expanded(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(18, 4, 18, 16),
@@ -381,6 +461,67 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             Text('= $_preview', style: Kawaii.display(compact ? 18 : 22).copyWith(color: skin.inkSoft)),
         ],
       ),
+    );
+  }
+
+  /// A slim bar of autocomplete chips that appears while the expression ends in
+  /// a partial function name. Tap a chip (or press Tab for the first) to
+  /// complete it. Hidden — collapsed to zero height — when there's nothing to
+  /// suggest.
+  Widget _suggestionBar(CalcSkin skin) {
+    final s = _suggestions;
+    return AnimatedSize(
+      duration: const Duration(milliseconds: 160),
+      curve: Curves.easeOut,
+      alignment: Alignment.topCenter,
+      child: s.isEmpty
+          ? const SizedBox(width: double.infinity)
+          : Container(
+              height: 42,
+              margin: const EdgeInsets.only(bottom: 8),
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: s.length,
+                separatorBuilder: (_, _) => const SizedBox(width: 8),
+                itemBuilder: (_, i) {
+                  final e = s[i];
+                  final primary = i == 0;
+                  return GestureDetector(
+                    onTap: () => _acceptSuggestion(e.$2),
+                    child: Container(
+                      alignment: Alignment.center,
+                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                      decoration: BoxDecoration(
+                        color: primary ? skin.eqFill : skin.funcFill,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: skin.funcEdge),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(e.$1,
+                              style: Kawaii.ui(15,
+                                  weight: FontWeight.w700, color: skin.ink)),
+                          if (primary) ...[
+                            const SizedBox(width: 7),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                              decoration: BoxDecoration(
+                                color: skin.ink.withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(5),
+                              ),
+                              child: Text('⇥',
+                                  style: Kawaii.ui(12,
+                                      weight: FontWeight.w800, color: skin.ink)),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
     );
   }
 
