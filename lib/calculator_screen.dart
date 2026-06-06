@@ -14,6 +14,7 @@ import 'tools/circle_screen.dart';
 import 'tools/countries.dart';
 import 'tools/country_picker.dart';
 import 'tools/currency_screen.dart';
+import 'tools/discount_screen.dart';
 import 'tools/split_screen.dart';
 import 'tools/tax_screen.dart';
 import 'tools/tool_ui.dart';
@@ -774,6 +775,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     (s) => TaxScreen(initialValue: s)),
                 tile(Icons.currency_exchange_rounded, 'Currency', 'Live exchange rates',
                     (s) => CurrencyScreen(initialAmount: s)),
+                tile(Icons.sell_rounded, 'Discount', 'Sale price: % off or amount off',
+                    (s) => DiscountScreen(initialValue: s)),
                 tile(Icons.groups_rounded, 'Split', 'Split a bill, with optional tip',
                     (s) => SplitScreen(initialValue: s)),
               ],

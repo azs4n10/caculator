@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:kawaii_calc/tools/circle_screen.dart';
+import 'package:kawaii_calc/tools/discount_screen.dart';
 import 'package:kawaii_calc/tools/split_screen.dart';
 import 'package:kawaii_calc/tools/tax_screen.dart';
 
@@ -58,6 +59,19 @@ void main() {
 
     // Default 2 people, no tip → 50 JPY each (Japan is the default country).
     expect(find.textContaining('50 JPY'), findsWidgets);
+  });
+
+  testWidgets('discount: 3000 with 30% off → pay 2100, save 900', (tester) async {
+    await tester.pumpWidget(const MaterialApp(home: DiscountScreen()));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField).first, '3000');
+    await tester.pump();
+    await tester.tap(find.text('30%')); // quick percent chip
+    await tester.pump();
+
+    expect(find.textContaining('2100 JPY'), findsWidgets); // you pay
+    expect(find.textContaining('900 JPY'), findsWidgets); // you save
   });
 
   testWidgets('circle accepts an initial value', (tester) async {
