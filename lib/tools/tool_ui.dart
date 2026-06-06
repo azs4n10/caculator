@@ -105,7 +105,9 @@ Widget selectChip(CalcSkin skin, String label, bool active, VoidCallback onTap, 
   final chip = GestureDetector(
     onTap: onTap,
     child: Container(
-      alignment: Alignment.center,
+      // Only fill width when expanded in a Row; in a Wrap leave intrinsic so
+      // chips sit side by side (a Container with alignment set would stretch).
+      alignment: expand ? Alignment.center : null,
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
         color: active ? skin.accent : skin.funcFill,
