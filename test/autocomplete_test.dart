@@ -58,4 +58,20 @@ void main() {
     // '*' is mapped to the on-screen '×'.
     expect(find.text('2×3'), findsOneWidget);
   });
+
+  testWidgets('+Tax key applies the country rate to the current value', (tester) async {
+    await pump(tester);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.digit1, character: '1');
+    await tester.sendKeyEvent(LogicalKeyboardKey.digit0, character: '0');
+    await tester.sendKeyEvent(LogicalKeyboardKey.digit0, character: '0');
+    await tester.pump();
+
+    // The default test viewport is wide, so function keys are always visible.
+    // Tap +Tax (Japan 10% by default → 110).
+    await tester.tap(find.text('+Tax'));
+    await tester.pump();
+
+    expect(find.text('110'), findsWidgets);
+  });
 }
