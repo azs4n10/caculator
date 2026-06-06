@@ -62,7 +62,8 @@ class _TaxScreenState extends State<TaxScreen> {
       title: 'Tax',
       icon: Icons.percent_rounded,
       actions: [
-        useInCalcAction(context, skin, () => r.gross == null ? null : bareNumber(r.gross!)),
+        useInCalcAction(context, skin,
+            () => r.gross == null ? null : bareNumber(r.gross!, decimals: currencyDecimals(_country.currency))),
       ],
       child: ListView(
         padding: const EdgeInsets.all(18),

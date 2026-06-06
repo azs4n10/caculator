@@ -42,7 +42,8 @@ class _SplitScreenState extends State<SplitScreen> {
       title: 'Split',
       icon: Icons.groups_rounded,
       actions: [
-        useInCalcAction(context, skin, () => each == null ? null : bareNumber(each)),
+        useInCalcAction(context, skin,
+            () => each == null ? null : bareNumber(each, decimals: currencyDecimals(_currency))),
       ],
       child: ListView(
         padding: const EdgeInsets.all(18),

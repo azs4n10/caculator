@@ -152,12 +152,13 @@ Widget useInCalcAction(BuildContext context, CalcSkin skin, String? Function() v
 // Currencies with no minor unit — show whole numbers.
 const _zeroDecimal = {'JPY', 'KRW', 'HUF', 'ISK', 'CLP', 'VND'};
 
+/// Decimal places to show for [currency] (0 for currencies with no minor unit).
+int currencyDecimals(String currency) => _zeroDecimal.contains(currency) ? 0 : 2;
+
 /// Formats a monetary value with the right number of decimals for [currency]
 /// and appends the code, e.g. "1,234 JPY" or "12.34 USD".
-String formatMoney(double v, String currency) {
-  final dec = _zeroDecimal.contains(currency) ? 0 : 2;
-  return '${CalculatorEngine.formatNumber(double.parse(v.toStringAsFixed(dec)))} $currency';
-}
+String formatMoney(double v, String currency) =>
+    '${CalculatorEngine.formatNumber(double.parse(v.toStringAsFixed(currencyDecimals(currency))))} $currency';
 
 /// Bare formatted number (no unit) for sending back to the calculator.
 String bareNumber(double v, {int decimals = 2}) =>
