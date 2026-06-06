@@ -16,6 +16,7 @@ import 'tools/country_picker.dart';
 import 'tools/currency_screen.dart';
 import 'tools/split_screen.dart';
 import 'tools/tax_screen.dart';
+import 'tools/tool_ui.dart';
 import 'widgets/typewriter_key.dart';
 
 class HistoryEntry {
@@ -93,6 +94,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     _FK('|x|', 'abs('),
     _FK('n!', '!'),
     _FK('Ans', '__ANS__'),
+    _FK('+Tax', '__TAX+__'),
+    _FK('−Tax', '__TAX-__'),
   ];
 
   void _onKey(_K k) {
@@ -616,10 +619,38 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           textColor: skin.funcText,
           texture: _texture,
           sizeFactor: 0.40,
-          onTap: () => _insert(insert),
+          onTap: () {
+            if (insert == '__TAX+__') {
+              _applyTax(true);
+            } else if (insert == '__TAX-__') {
+              _applyTax(false);
+            } else {
+              _insert(insert);
+            }
+          },
         ),
       ),
     );
+  }
+
+  /// Quick tax on the current value using the selected country's rate.
+  /// [add] = make it tax-included; otherwise extract the pre-tax amount.
+  void _applyTax(bool add) {
+    final seed = _seedValue();
+    final n = double.tryParse(seed ?? '');
+    if (n == null) return;
+    final c = countryByCode(countryCode);
+    final f = c.taxRate / 100;
+    final out = add ? n * (1 + f) : n / (1 + f);
+    final s = bareNumber(out, decimals: currencyDecimals(c.currency));
+    mediumHaptic();
+    setState(() {
+      _history.insert(0, HistoryEntry('$seed ${add ? '+' : '−'}tax ${trimRate(c.taxRate)}%', s));
+      _expr = '';
+      _result = s;
+      _justEvaluated = true;
+      _preview = '';
+    });
   }
 
   Widget _grid(CalcSkin skin, List<_K> keys, int cols, {required double gap}) {
