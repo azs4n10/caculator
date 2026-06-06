@@ -44,7 +44,7 @@ class _TypewriterKeyState extends State<TypewriterKey> {
   Color _d(double t) => Color.lerp(widget.color, Colors.black, t)!;
 
   static const _mathAxis = {'×', '÷', '−', '-', '+', '='};
-  double _dy(double size) => _mathAxis.contains(widget.label) ? size * 0.09 : 0;
+  double _dy(double size) => _mathAxis.contains(widget.label) ? size * 0.13 : 0;
 
   @override
   Widget build(BuildContext context) {
@@ -66,6 +66,13 @@ class _TypewriterKeyState extends State<TypewriterKey> {
           BoxShadow(color: Colors.black.withValues(alpha: _down ? 0.06 : 0.16), offset: Offset(0, _down ? 1 : 3.5), blurRadius: _down ? 3 : 7),
         ];
 
+        // A subtle rim so keys stay defined against the background — lighter on
+        // dark keys (dark themes), darker on light keys.
+        final dark = widget.color.computeLuminance() < 0.45;
+        final borderColor = dark
+            ? Color.lerp(widget.color, Colors.white, 0.32)!
+            : Color.lerp(widget.color, Colors.black, 0.10)!;
+
         return GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTapDown: (_) => setState(() => _down = true),
@@ -80,6 +87,7 @@ class _TypewriterKeyState extends State<TypewriterKey> {
             margin: EdgeInsets.only(top: _down ? shift : 0),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
+              border: crystal ? null : Border.all(color: borderColor, width: dark ? 1.3 : 1.0),
               boxShadow: crystal ? crystalShadow : (_down ? pressed : raised),
             ),
             child: Stack(
