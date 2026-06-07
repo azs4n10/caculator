@@ -43,23 +43,11 @@ class _TypewriterKeyState extends State<TypewriterKey> {
 
   Color _d(double t) => Color.lerp(widget.color, Colors.black, t)!;
 
-  // Operator glyphs are drawn high on the font's "math axis", so they look
-  // above-centre when the text box is centred in the round keycap; nudge them
-  // down. The × and ÷ signs sit highest and need a touch more than + − =.
-  double _dy(double size) {
-    switch (widget.label) {
-      case '×':
-      case '÷':
-        return size * 0.21;
-      case '+':
-      case '−':
-      case '-':
-      case '=':
-        return size * 0.13;
-      default:
-        return 0;
-    }
-  }
+  // Operator glyphs are drawn as crisp vector strokes (not font characters) so
+  // they sit *exactly* centred in the round keycap regardless of the chosen
+  // font — font glyphs for × ÷ − + = sit high on the math axis and never
+  // centre reliably across fonts.
+  static const _vectorOps = {'×', '÷', '−', '-', '+', '='};
 
   @override
   Widget build(BuildContext context) {
@@ -113,18 +101,24 @@ class _TypewriterKeyState extends State<TypewriterKey> {
                   CustomPaint(painter: KeycapPainter(color: widget.color, texture: t, pressed: _down ? 1 : 0)),
                 ] else
                   CustomPaint(painter: KeycapPainter(color: widget.color, texture: t, pressed: _down ? 1 : 0)),
-                Center(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: w * 0.12),
-                    child: Transform.translate(
-                      offset: Offset(0, _dy(h * widget.sizeFactor)),
+                if (_vectorOps.contains(widget.label))
+                  CustomPaint(
+                    painter: _OpGlyphPainter(
+                      label: widget.label,
+                      color: widget.textColor,
+                      sizeFactor: widget.sizeFactor,
+                    ),
+                  )
+                else
+                  Center(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: w * 0.12),
                       child: FittedBox(
                         fit: BoxFit.scaleDown,
                         child: Text(widget.label, style: Kawaii.key(h * widget.sizeFactor).copyWith(color: widget.textColor)),
                       ),
                     ),
                   ),
-                ),
               ],
             ),
           ),
@@ -148,4 +142,61 @@ class _TypewriterKeyState extends State<TypewriterKey> {
       ),
     );
   }
+}
+
+/// Draws the calculator operators (× ÷ − + =) as rounded vector strokes,
+/// perfectly centred in the keycap. Sized to roughly match the digit glyphs.
+class _OpGlyphPainter extends CustomPainter {
+  final String label;
+  final Color color;
+  final double sizeFactor;
+  _OpGlyphPainter({required this.label, required this.color, required this.sizeFactor});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final c = Offset(size.width / 2, size.height / 2);
+    final m = size.shortestSide;
+    final e = m * sizeFactor * 0.34; // half-extent of the symbol
+    final sw = m * sizeFactor * 0.135; // stroke width
+    final stroke = Paint()
+      ..color = color
+      ..strokeWidth = sw
+      ..strokeCap = StrokeCap.round
+      ..style = PaintingStyle.stroke
+      ..isAntiAlias = true;
+
+    switch (label) {
+      case '−':
+      case '-':
+        canvas.drawLine(c + Offset(-e, 0), c + Offset(e, 0), stroke);
+        break;
+      case '+':
+        canvas.drawLine(c + Offset(-e, 0), c + Offset(e, 0), stroke);
+        canvas.drawLine(c + Offset(0, -e), c + Offset(0, e), stroke);
+        break;
+      case '×':
+        final d = e * 0.8; // diagonals read larger, so trim a little
+        canvas.drawLine(c + Offset(-d, -d), c + Offset(d, d), stroke);
+        canvas.drawLine(c + Offset(-d, d), c + Offset(d, -d), stroke);
+        break;
+      case '÷':
+        canvas.drawLine(c + Offset(-e, 0), c + Offset(e, 0), stroke);
+        final dot = Paint()
+          ..color = color
+          ..style = PaintingStyle.fill
+          ..isAntiAlias = true;
+        canvas.drawCircle(c + Offset(0, -e * 0.86), sw * 0.62, dot);
+        canvas.drawCircle(c + Offset(0, e * 0.86), sw * 0.62, dot);
+        break;
+      case '=':
+        final gap = e * 0.46;
+        canvas.drawLine(c + Offset(-e, -gap), c + Offset(e, -gap), stroke);
+        canvas.drawLine(c + Offset(-e, gap), c + Offset(e, gap), stroke);
+        break;
+    }
+  }
+
+  @override
+  bool shouldRepaint(_OpGlyphPainter old) =>
+      old.label != label || old.color != color || old.sizeFactor != sizeFactor;
 }
