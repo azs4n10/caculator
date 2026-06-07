@@ -43,8 +43,23 @@ class _TypewriterKeyState extends State<TypewriterKey> {
 
   Color _d(double t) => Color.lerp(widget.color, Colors.black, t)!;
 
-  static const _mathAxis = {'×', '÷', '−', '-', '+', '='};
-  double _dy(double size) => _mathAxis.contains(widget.label) ? size * 0.13 : 0;
+  // Operator glyphs are drawn high on the font's "math axis", so they look
+  // above-centre when the text box is centred in the round keycap; nudge them
+  // down. The × and ÷ signs sit highest and need a touch more than + − =.
+  double _dy(double size) {
+    switch (widget.label) {
+      case '×':
+      case '÷':
+        return size * 0.21;
+      case '+':
+      case '−':
+      case '-':
+      case '=':
+        return size * 0.13;
+      default:
+        return 0;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
