@@ -32,9 +32,10 @@ void main() {
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull, reason: '$name — default');
 
-      // Core keys are present and laid out.
+      // Core keys are present and laid out. (Operators like = are drawn as
+      // vector glyphs, not text, so we check a digit and the clear key.)
       expect(find.text('7'), findsOneWidget);
-      expect(find.text('='), findsOneWidget);
+      expect(find.text('C'), findsOneWidget);
 
       // Open the function drawer.
       await tester.tap(find.text('ƒ(x) functions'));
