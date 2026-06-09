@@ -17,6 +17,9 @@ __pycache__/
 .swiftpm/
 migrate_working_dir/
 
+# Claude Code local settings (machine paths, command history — never publish)
+.claude/
+
 # IntelliJ related
 *.iml
 *.ipr
